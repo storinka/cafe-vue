@@ -1,9 +1,9 @@
 import { App, reactive } from "vue";
-import { CafeResultV3 } from "./storinka.t";
+import { CafeResultV3 } from "./types";
 
-export * from "./storinka.t";
+export * from "./types";
 
-interface StorinkaOptions {
+export interface StorinkaOptions {
     apiUrl?: string;
 }
 
@@ -88,4 +88,10 @@ const defaultCreateStorinkaOptions: StorinkaOptions = {
 
 export function createStorinka(options: StorinkaOptions = defaultCreateStorinkaOptions): Storinka {
     return new Storinka(options);
+}
+
+declare module '@vue/runtime-core' {
+    export interface ComponentCustomProperties {
+        $storinka: Storinka;
+    }
 }
