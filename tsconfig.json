@@ -1,13 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "es2015",
     "module": "commonjs",
     "declaration": true,
     "outDir": "./lib",
     "strict": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "allowJs": true
+    "allowJs": true,
+    "lib": [
+      "es2018",
+      "DOM"
+    ]
   },
   "include": [
     "src"
