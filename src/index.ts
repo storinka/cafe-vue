@@ -43,6 +43,8 @@ export class Storinka {
     }
 
     setLanguage(language: string): Promise<CafeResultV3> {
+        this.state.isLoading = true;
+
         return this.invoke("getCafe", {
             id: this.state.id,
             language,
