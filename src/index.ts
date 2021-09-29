@@ -1,5 +1,5 @@
 import { App, reactive } from "vue";
-import { CafeResultV3 } from "./types";
+import { CafeResultV3, CategoryResultV3, DishResultV3, MenuResultV3, TagResultV3 } from "./types";
 
 export * from "./types";
 
@@ -81,6 +81,71 @@ export class Storinka {
 
         // eslint-disable-next-line no-param-reassign
         app.config.globalProperties.$storinka = this;
+    }
+
+    getMenu(menuId: number): MenuResultV3 | undefined {
+        return this.state.cafe?.menus.find(menu => menu.id === menuId);
+    }
+
+    getCategory(categoryId: number): CategoryResultV3 | undefined {
+        return this.state.cafe?.categories.find(category => category.id === categoryId);
+    }
+
+    getDish(dishId: number): DishResultV3 | undefined {
+        return this.state.cafe?.dishes.find(dish => dish.id === dishId);
+    }
+
+    getOption(optionId: number) {
+        return this.state.cafe?.options.find(option => option.id === optionId);
+    }
+
+    getTag(tagId: number) {
+        return this.state.cafe?.tags.find(tag => tag.id === tagId);
+    }
+
+    getDiscount(discountId: number) {
+        return this.state.cafe?.discounts.find(discount => discount.id === discountId);
+    }
+
+    getAdvertisement(advertisementId: number) {
+        return this.state.cafe?.advertisements.find(advertisement => advertisement.id === advertisementId);
+    }
+
+    getSet(setId: number) {
+        return this.state.cafe?.sets.find(set => set.id === setId);
+    }
+
+    getMenuCategories(menuId: number): CategoryResultV3[] {
+        const menu = this.getMenu(menuId);
+
+        if (!menu) {
+            return [];
+        }
+
+        return menu.categories_ids
+            .map(categoryId => this.getCategory(categoryId))
+            .filter(category => category) as CategoryResultV3[];
+    }
+
+    getCategoryDishes(categoryId: number): DishResultV3[] {
+        const category = this.getCategory(categoryId);
+
+        if (!category) {
+            return [];
+        }
+
+        return category.dishes_ids
+            .map(dishId => this.getDish(dishId))
+            .filter(dish => dish) as DishResultV3[];
+    }
+
+    getDishTags(dishId: number): TagResultV3[] {
+        if (!this.state.cafe) {
+            return [];
+        }
+
+        return this.state.cafe.tags
+            .filter((tag: TagResultV3) => tag.dishes_ids.includes(dishId));
     }
 }
 
