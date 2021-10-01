@@ -122,36 +122,36 @@ export class Storinka {
             .then((r) => r.result);
     }
 
-    getMenu(menuId: number): MenuResultV3 | undefined {
-        return this.state.cafe?.menus.find(menu => menu.id === menuId);
+    getMenu(menuId: number | string): MenuResultV3 | undefined {
+        return this.state.cafe?.menus.find(menu => this.checkItemId(menu, menuId));
     }
 
-    getCategory(categoryId: number): CategoryResultV3 | undefined {
-        return this.state.cafe?.categories.find(category => category.id === categoryId);
+    getCategory(categoryId: number | string): CategoryResultV3 | undefined {
+        return this.state.cafe?.categories.find(category => this.checkItemId(category, categoryId));
     }
 
-    getDish(dishId: number): DishResultV3 | undefined {
-        return this.state.cafe?.dishes.find(dish => dish.id === dishId);
+    getDish(dishId: number | string): DishResultV3 | undefined {
+        return this.state.cafe?.dishes.find(dish => this.checkItemId(dish, dishId));
     }
 
     getOption(optionId: number) {
         return this.state.cafe?.options.find(option => option.id === optionId);
     }
 
-    getTag(tagId: number) {
-        return this.state.cafe?.tags.find(tag => tag.id === tagId);
+    getTag(tagId: number | string) {
+        return this.state.cafe?.tags.find(tag => this.checkItemId(tag, tagId));
     }
 
     getDiscount(discountId: number) {
         return this.state.cafe?.discounts.find(discount => discount.id === discountId);
     }
 
-    getAdvertisement(advertisementId: number) {
-        return this.state.cafe?.advertisements.find(advertisement => advertisement.id === advertisementId);
+    getAdvertisement(advertisementId: number | string) {
+        return this.state.cafe?.advertisements.find(advertisement => this.checkItemId(advertisement, advertisementId));
     }
 
     getSet(setId: number) {
-        return this.state.cafe?.sets.find(set => set.id === setId);
+        return this.state.cafe?.sets.find(set => this.checkItemId(set, setId));
     }
 
     getMenuCategories(menuId: number): CategoryResultV3[] {
@@ -207,8 +207,12 @@ export class Storinka {
         return this.getAppUrl(`${this.getItemProperId(menu)}/${this.getItemProperId(category)}/${this.getItemProperId(dish)}`)
     }
 
-    getItemProperId(item: MenuResultV3 | CategoryResultV3 | DishResultV3 | TagResultV3 | AdvertisementResultV3) {
-        return item.slug || item.hash_id || item.id;
+    getItemProperId(item: ItemWithSlugOrHashId): string {
+        return item.slug || item.hash_id;
+    }
+
+    checkItemId(item: ItemWithSlugOrHashId, id: string | number): boolean {
+        return item.hash_id === id || item.slug === id || item.id === id;
     }
 
     isCustomDomain(domain?: string) {
@@ -219,6 +223,8 @@ export class Storinka {
         return !(["storinka.menu", "storinka.delivery"].includes(domain));
     }
 }
+
+type ItemWithSlugOrHashId = MenuResultV3 | CategoryResultV3 | DishResultV3 | TagResultV3 | AdvertisementResultV3;
 
 export function createStorinka(options: StorinkaOptions = {}): Storinka {
     return new Storinka(options);
