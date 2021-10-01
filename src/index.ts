@@ -3,10 +3,16 @@ import {
     AdvertisementResultV3,
     CafeResultV3,
     CategoryResultV3,
+    DiscountResultV3,
     DishResultV3,
+    DishVariantResultV3,
     MenuResultV3,
+    OptionItemResultV3,
+    OptionResultV3,
+    SetResultV3,
     TagResultV3
 } from "./types";
+import Cart, { OrderItemInput } from "@storinka/cart";
 
 export * from "./types";
 
@@ -38,6 +44,8 @@ export class Storinka {
         cafe?: CafeResultV3;
     };
 
+    cart: Cart;
+
     constructor(options: StorinkaOptions) {
         this.options = options;
         if (!this.options.apiUrl) {
@@ -56,6 +64,8 @@ export class Storinka {
         this.state = reactive({
             isLoading: false,
         });
+
+        this.cart = new Cart();
     }
 
     install(app: App): void {
@@ -127,35 +137,80 @@ export class Storinka {
     }
 
     getMenu(menuId: number | string): MenuResultV3 | undefined {
-        return this.state.cafe?.menus.find(menu => this.checkItemId(menu, menuId));
+        return (this.state.cafe?.menus ?? [])
+            .find(menu => this.checkItemId(menu, menuId));
     }
 
     getCategory(categoryId: number | string): CategoryResultV3 | undefined {
-        return this.state.cafe?.categories.find(category => this.checkItemId(category, categoryId));
+        return (this.state.cafe?.categories ?? [])
+            .find(category => this.checkItemId(category, categoryId));
     }
 
     getDish(dishId: number | string): DishResultV3 | undefined {
-        return this.state.cafe?.dishes.find(dish => this.checkItemId(dish, dishId));
+        return (this.state.cafe?.dishes ?? [])
+            .find(dish => this.checkItemId(dish, dishId));
     }
 
-    getOption(optionId: number) {
-        return this.state.cafe?.options.find(option => option.id === optionId);
+    getDishByVariant(variantId: number): DishResultV3 | undefined {
+        if (variantId === 0) {
+            throw new Error("Variant id cannot be zero.")
+        }
+
+        return (this.state.cafe?.dishes ?? [])
+            .find(dish => dish.variants.find(variant => variant.id === variantId));
     }
 
-    getTag(tagId: number | string) {
-        return this.state.cafe?.tags.find(tag => this.checkItemId(tag, tagId));
+    getDishDefaultVariant(dishOrId: number | DishResultV3): DishVariantResultV3 | undefined {
+        const dish = typeof dishOrId === "number" ? this.getDish(dishOrId) : dishOrId;
+
+        return (dish?.variants ?? [])
+            .find(variant => variant.id === 0);
     }
 
-    getDiscount(discountId: number) {
-        return this.state.cafe?.discounts.find(discount => discount.id === discountId);
+    getVariant(variantId: number): DishVariantResultV3 | undefined {
+        if (variantId === 0) {
+            throw new Error("Variant id cannot be zero.")
+        }
+
+        return this.state.cafe?.dishes
+            .flatMap(dish => dish.variants)
+            .find(variant => variant.id === variantId);
     }
 
-    getAdvertisement(advertisementId: number | string) {
-        return this.state.cafe?.advertisements.find(advertisement => this.checkItemId(advertisement, advertisementId));
+    getOption(optionId: number): OptionResultV3 | undefined {
+        return (this.state.cafe?.options ?? [])
+            .find(option => option.id === optionId);
     }
 
-    getSet(setId: number) {
-        return this.state.cafe?.sets.find(set => this.checkItemId(set, setId));
+    getOptionByItem(optionItemId: number): OptionResultV3 | undefined {
+        return (this.state.cafe?.options ?? [])
+            .find(option => option.items.find(optionItem => optionItem.id === optionItemId));
+    }
+
+    getOptionItem(optionItemId: number): OptionItemResultV3 | undefined {
+        return this.state.cafe?.options
+            .flatMap(option => option.items)
+            .find(optionItem => optionItem.id === optionItemId);
+    }
+
+    getTag(tagId: number | string): TagResultV3 | undefined {
+        return (this.state.cafe?.tags ?? [])
+            .find(tag => this.checkItemId(tag, tagId));
+    }
+
+    getDiscount(discountId: number): DiscountResultV3 | undefined {
+        return (this.state.cafe?.discounts ?? [])
+            .find(discount => discount.id === discountId);
+    }
+
+    getAdvertisement(advertisementId: number | string): AdvertisementResultV3 | undefined {
+        return (this.state.cafe?.advertisements ?? [])
+            .find(advertisement => this.checkItemId(advertisement, advertisementId));
+    }
+
+    getSet(setId: number): SetResultV3 | undefined {
+        return (this.state.cafe?.sets ?? [])
+            .find(set => this.checkItemId(set, setId));
     }
 
     getMenuCategories(menuOrId: number | MenuResultV3): CategoryResultV3[] {
@@ -241,6 +296,30 @@ export class Storinka {
         return !(["storinka.menu", "storinka.delivery"]
             .concat(...(this.options.domains ?? []))
             .includes(domain));
+    }
+
+    getCartTotal() {
+        return this.cart.items.map(item => this.getCartItemTotal(item));
+    }
+
+    getCartItemTotal(item: OrderItemInput) {
+        let price = 0;
+
+        if (item.item_type === "dish") {
+            price = this.getDishDefaultVariant(item.item_id)?.price ?? 0;
+        }
+
+        if (item.item_type === "variant") {
+            price = this.getVariant(item.item_id)?.price ?? 0;
+        }
+
+        if (item.item_type === "option") {
+            price = this.getOptionItem(item.item_id)?.price ?? 0;
+        }
+
+        // todo: calculate subitems total
+
+        return price * item.quantity;
     }
 }
 

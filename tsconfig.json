@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "allowJs": true,
     "lib": [
-      "es2018",
+      "es2019",
       "DOM"
     ]
   },

@@ -20,6 +20,11 @@
     "@babel/helper-validator-identifier" "^7.14.9"
     to-fast-properties "^2.0.0"
 
+"@storinka/cart@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@storinka/cart/-/cart-1.0.2.tgz#1aed9ee3955b5c9345ee3bcfa2dd210e3128a3ea"
+  integrity sha512-3zOPj9eAN+IqYcrKMQXCFpIr2pdy1vHtQkNItMasWiPN6+yfGqMVRW1H9jvk3TVBtF0sDpIRmkt3sNFhe56wiw==
+
 "@types/strip-bom@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/strip-bom/-/strip-bom-3.0.0.tgz#14a8ec3956c2e81edb7520790aecf21c290aebd2"
