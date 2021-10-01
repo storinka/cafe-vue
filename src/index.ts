@@ -14,6 +14,7 @@ export interface StorinkaOptions {
     apiUrl?: string;
     apiVersion?: string;
     domain?: string;
+    domains?: string[];
 }
 
 export class ApiError {
@@ -47,6 +48,9 @@ export class Storinka {
         }
         if (!this.options.domain) {
             this.options.domain = location.hostname;
+        }
+        if (!this.options.domains) {
+            this.options.domains = [];
         }
 
         this.state = reactive({
@@ -187,24 +191,24 @@ export class Storinka {
             .filter((tag: TagResultV3) => tag.dishes_ids.includes(dishId));
     }
 
-    getAppUrl(path: string): string {
+    getAppPath(path: string): string {
         if (this.isCustomDomain()) {
-            return `${this.options.domain}/${path}`;
+            return `/${path}`;
         }
 
-        return `${this.options.domain}/${this.state.id}/${path}`
+        return `/${this.state.id}/${path}`
     }
 
-    getMenuUrl(menu: MenuResultV3) {
-        return this.getAppUrl(`${this.getItemProperId(menu)}`)
+    getMenuPath(menu: MenuResultV3) {
+        return this.getAppPath(`${this.getItemProperId(menu)}`)
     }
 
-    getCategoryUrl(menu: MenuResultV3, category: CategoryResultV3) {
-        return this.getAppUrl(`${this.getItemProperId(menu)}/${this.getItemProperId(category)}`)
+    getCategoryPath(menu: MenuResultV3, category: CategoryResultV3) {
+        return this.getAppPath(`${this.getItemProperId(menu)}/${this.getItemProperId(category)}`)
     }
 
-    getDishUrl(menu: MenuResultV3, category: CategoryResultV3, dish: DishResultV3) {
-        return this.getAppUrl(`${this.getItemProperId(menu)}/${this.getItemProperId(category)}/${this.getItemProperId(dish)}`)
+    getDishPath(menu: MenuResultV3, category: CategoryResultV3, dish: DishResultV3) {
+        return this.getAppPath(`${this.getItemProperId(menu)}/${this.getItemProperId(category)}/${this.getItemProperId(dish)}`)
     }
 
     getItemProperId(item: ItemWithSlugOrHashId): string {
@@ -220,7 +224,9 @@ export class Storinka {
             domain = this.options.domain || "";
         }
 
-        return !(["storinka.menu", "storinka.delivery"].includes(domain));
+        return !(["storinka.menu", "storinka.delivery"]
+            .concat(...(this.options.domains ?? []))
+            .includes(domain));
     }
 }
 
