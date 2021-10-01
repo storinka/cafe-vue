@@ -115,4 +115,5 @@ export interface AdvertisementResultV3 {
   title: string;
   short: string;
   full?: null | string;
+  color: string;
 }

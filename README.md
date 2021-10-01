@@ -36,7 +36,7 @@ app.use(createStorinka());
 
 <script>
 export default {
-  mounted() {
+  created() {
     this.$storinka.setCafe("kava-gallery", "uk");
   }
 }
