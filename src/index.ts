@@ -158,8 +158,8 @@ export class Storinka {
         return this.state.cafe?.sets.find(set => this.checkItemId(set, setId));
     }
 
-    getMenuCategories(menuId: number): CategoryResultV3[] {
-        const menu = this.getMenu(menuId);
+    getMenuCategories(menuOrId: number | MenuResultV3): CategoryResultV3[] {
+        const menu = typeof menuOrId === "number" ? this.getMenu(menuOrId) : menuOrId;
 
         if (!menu) {
             return [];
@@ -170,8 +170,8 @@ export class Storinka {
             .filter(category => category) as CategoryResultV3[];
     }
 
-    getCategoryDishes(categoryId: number): DishResultV3[] {
-        const category = this.getCategory(categoryId);
+    getCategoryDishes(categoryOrId: number | CategoryResultV3): DishResultV3[] {
+        const category = typeof categoryOrId === "number" ? this.getCategory(categoryOrId) : categoryOrId;
 
         if (!category) {
             return [];
@@ -182,10 +182,12 @@ export class Storinka {
             .filter(dish => dish) as DishResultV3[];
     }
 
-    getDishTags(dishId: number): TagResultV3[] {
+    getDishTags(dishOrId: number | DishResultV3): TagResultV3[] {
         if (!this.state.cafe) {
             return [];
         }
+
+        const dishId = typeof dishOrId === "number" ? dishOrId : dishOrId.id;
 
         return this.state.cafe.tags
             .filter((tag: TagResultV3) => tag.dishes_ids.includes(dishId));
