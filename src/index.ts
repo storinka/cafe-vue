@@ -192,11 +192,21 @@ export class Storinka {
     }
 
     getAppPath(path: string): string {
-        if (this.isCustomDomain()) {
-            return `/${path}`;
+        path = path.trim();
+        if (path.startsWith("/")) {
+            path = path.substr(1);
+        }
+        if (path.endsWith("/")) {
+            path = path.substr(0, path.length - 1);
         }
 
-        return `/${this.state.id}/${path}`
+        const slash = path.length ? "/" : "";
+
+        if (this.isCustomDomain()) {
+            return `${slash}${path}`;
+        }
+
+        return `${slash}${this.state.id}/${path}`
     }
 
     getMenuPath(menu: MenuResultV3) {
