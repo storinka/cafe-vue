@@ -200,13 +200,15 @@ export class Storinka {
             path = path.substr(0, path.length - 1);
         }
 
-        const slash = path.length ? "/" : "";
-
         if (this.isCustomDomain()) {
-            return `${slash}${path}`;
+            return `/${path}`;
         }
 
-        return `${slash}${this.state.id}/${path}`
+        if (!path.length) {
+            return `/${this.state.id}`;
+        }
+
+        return `/${this.state.id}/${path}`
     }
 
     getMenuPath(menu: MenuResultV3) {
