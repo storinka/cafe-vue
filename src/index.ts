@@ -65,7 +65,7 @@ export class Storinka {
             isLoading: false,
         });
 
-        this.cart = new Cart();
+        this.cart = reactive(new Cart());
     }
 
     install(app: App): void {
