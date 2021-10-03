@@ -12,7 +12,7 @@ import {
     SetResultV3,
     TagResultV3
 } from "./types";
-import Cart, { OrderItemInput } from "@storinka/cart";
+import Cart, { OrderItemInput, OrderSubitemInput } from "@storinka/cart";
 
 export * from "./types";
 
@@ -298,12 +298,13 @@ export class Storinka {
             .includes(domain));
     }
 
-    getCartTotal() {
-        return this.cart.items.map(item => this.getCartItemTotal(item));
+    getCartTotal(): number {
+        return this.cart.items.map(item => this.getCartItemTotal(item))
+            .reduce((p, c) => p + c, 0);
     }
 
-    getCartItemTotal(item: OrderItemInput) {
-        let price = 0;
+    getCartItemTotal(item: OrderItemInput): number {
+        let price: number = 0;
 
         if (item.item_type === "dish") {
             price = this.getDishDefaultVariant(item.item_id)?.price ?? 0;
@@ -313,13 +314,15 @@ export class Storinka {
             price = this.getVariant(item.item_id)?.price ?? 0;
         }
 
-        if (item.item_type === "option") {
-            price = this.getOptionItem(item.item_id)?.price ?? 0;
-        }
+        let subitemsPrice: number = item.subitems
+            .map(subitem => this.getCartSubitemTotal(subitem))
+            .reduce((p, c) => p + c, 0);
 
-        // todo: calculate subitems total
+        return (price + subitemsPrice) * item.quantity;
+    }
 
-        return price * item.quantity;
+    getCartSubitemTotal(subitem: OrderSubitemInput): number {
+        return this.getOptionItem(subitem.item_id)?.price ?? 0;
     }
 }
 
