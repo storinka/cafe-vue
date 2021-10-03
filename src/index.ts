@@ -52,7 +52,7 @@ export class Storinka {
             this.options.apiUrl = "https://api.storinka.menu"
         }
         if (!this.options.apiVersion) {
-            this.options.apiVersion = "3";
+            this.options.apiVersion = "2";
         }
         if (!this.options.domain) {
             this.options.domain = location.hostname;
@@ -80,7 +80,7 @@ export class Storinka {
         this.state.isLoading = true;
         this.state.id = id;
 
-        return this.invoke("getCafe", {
+        return this.invoke("v3.getCafe", {
             id,
             language,
         })
@@ -97,7 +97,7 @@ export class Storinka {
     setLanguage(language: string): Promise<CafeResultV3> {
         this.state.isLoading = true;
 
-        return this.invoke("getCafe", {
+        return this.invoke("v3.getCafe", {
             id: this.state.id,
             language,
         })
