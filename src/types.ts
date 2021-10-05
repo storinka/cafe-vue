@@ -129,3 +129,17 @@ export interface AdvertisementResultV3 {
     full?: null | string;
     color: string;
 }
+
+export interface CartSubitem {
+    option: OptionResultV3;
+    optionItem: OptionItemResultV3;
+    total: number;
+}
+
+export interface CartItem {
+    dish: DishResultV3;
+    variant: DishVariantResultV3;
+    quantity: number;
+    total: number;
+    subitems: CartSubitem[];
+}

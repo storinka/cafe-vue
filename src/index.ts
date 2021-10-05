@@ -2,6 +2,8 @@ import { App, reactive } from "vue";
 import {
     AdvertisementResultV3,
     CafeResultV3,
+    CartItem,
+    CartSubitem,
     CategoryResultV3,
     DiscountResultV3,
     DishResultV3,
@@ -12,7 +14,7 @@ import {
     SetResultV3,
     TagResultV3
 } from "./types";
-import Cart, { OrderItemInput, OrderSubitemInput } from "@storinka/cart";
+import Cart from "@storinka/cart";
 
 export * from "./types";
 
@@ -299,30 +301,58 @@ export class Storinka {
     }
 
     getCartTotal(): number {
-        return this.cart.items.map(item => this.getCartItemTotal(item))
+        return this.getCartItems()
+            .map(item => item.total)
             .reduce((p, c) => p + c, 0);
     }
 
-    getCartItemTotal(item: OrderItemInput): number {
-        let price: number = 0;
+    getCartItems(): CartItem[] {
+        return this.cart.items.map(orderItem => {
+            const dish = orderItem.item_type === "dish" ? this.getDish(orderItem.item_id) : this.getDishByVariant(orderItem.item_id);
+            if (!dish) {
+                throw new Error(`Dish ${orderItem.item_id} not found!`);
+            }
 
-        if (item.item_type === "dish") {
-            price = this.getDishDefaultVariant(item.item_id)?.price ?? 0;
-        }
+            const variant = orderItem.item_type === "dish" ? this.getDishDefaultVariant(orderItem.item_id) : this.getVariant(orderItem.item_id);
+            if (!variant) {
+                throw new Error(`Variant ${orderItem.item_id} not found!`);
+            }
 
-        if (item.item_type === "variant") {
-            price = this.getVariant(item.item_id)?.price ?? 0;
-        }
+            const subitems = orderItem.subitems.map(orderSubitem => {
+                const option = this.getOptionByItem(orderSubitem.item_id);
+                if (!option) {
+                    throw new Error(`Option for item ${orderSubitem.item_id} not found!`);
+                }
 
-        let subitemsPrice: number = item.subitems
-            .map(subitem => this.getCartSubitemTotal(subitem))
-            .reduce((p, c) => p + c, 0);
+                const optionItem = this.getOptionItem(orderSubitem.item_id);
+                if (!optionItem) {
+                    throw new Error(`Option item ${orderSubitem.item_id} not found!`);
+                }
 
-        return (price + subitemsPrice) * item.quantity;
-    }
+                return {
+                    option,
+                    optionItem,
 
-    getCartSubitemTotal(subitem: OrderSubitemInput): number {
-        return this.getOptionItem(subitem.item_id)?.price ?? 0;
+                    total: optionItem.price,
+                } as CartSubitem;
+            });
+
+            const subitemsTotal: number = subitems.map(subitem => subitem.total)
+                .reduce((p, c) => p + c, 0);
+
+            const quantity = orderItem.quantity;
+            const total = (subitemsTotal + variant.price) * quantity;
+
+            return {
+                dish,
+                variant,
+
+                quantity,
+                total,
+
+                subitems,
+            } as CartItem;
+        });
     }
 }
 
