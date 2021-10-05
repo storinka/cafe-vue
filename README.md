@@ -42,3 +42,93 @@ export default {
 }
 </script>
 ```
+
+## Properties
+
+### `state`:
+
+Current state which contains info about current cafe.
+
+Properties:
+
+- `cafe` - cafe object; type: `CafeResultV3`.
+- `id` - id by which the cafe was loaded; type: `string`;
+- `isLoading` - is cafe currently loading; type: `boolean`;
+
+### `cart`:
+
+Cart state object. Type: `Cart`.
+
+Check [https://github.com/storinka/cart](https://github.com/storinka/cart) for more info.
+
+## Functions
+
+### `setCafe(id: string, language: string)`
+
+Returns `Promise<CafeResultV3>`
+
+Sets current cafe by id. Id can be **hash id**, **slug** or **domain**.
+> If you are using a **domain** as id, you must add dollar sign (`$`) as prefix to it. Example: `$storinka.menu`.
+
+### `setLanguage(language: string)`
+
+Returns `Promise<CafeResultV3>`
+
+Sets language for current cafe.
+
+### Other functions:
+
+```
+getMenu(menuId: number | string): MenuResultV3 | undefined;
+
+getCategory(categoryId: number | string): CategoryResultV3 | undefined;
+
+getDish(dishId: number | string): DishResultV3 | undefined;
+
+getDishByVariant(variantId: number): DishResultV3 | undefined;
+
+getDishDefaultVariant(dishOrId: number | DishResultV3): DishVariantResultV3 | undefined;
+
+getVariant(variantId: number): DishVariantResultV3 | undefined;
+
+getOption(optionId: number): OptionResultV3 | undefined;
+
+getOptionByItem(optionItemId: number): OptionResultV3 | undefined;
+
+getOptionItem(optionItemId: number): OptionItemResultV3 | undefined;
+
+getTag(tagId: number | string): TagResultV3 | undefined;
+
+getDiscount(discountId: number): DiscountResultV3 | undefined;
+
+getAdvertisement(advertisementId: number | string): AdvertisementResultV3 | undefined;
+
+getSet(setId: number): SetResultV3 | undefined;
+
+getMenuCategories(menuOrId: number | MenuResultV3): CategoryResultV3[];
+
+getCategoryDishes(categoryOrId: number | CategoryResultV3): DishResultV3[];
+
+getDishTags(dishOrId: number | DishResultV3): TagResultV3[];
+
+
+getAppPath(path: string): string;
+
+getMenuPath(menu: MenuResultV3): string;
+
+getCategoryPath(menu: MenuResultV3, category: CategoryResultV3): string;
+
+getDishPath(menu: MenuResultV3, category: CategoryResultV3, dish: DishResultV3): string;
+
+
+getItemProperId(item: ItemWithSlugOrHashId): string;
+
+checkItemId(item: ItemWithSlugOrHashId, id: string | number): boolean;
+
+isCustomDomain(domain?: string): boolean;
+
+
+getCartTotal(): number;
+
+getCartItems(): CartItem[];
+```
