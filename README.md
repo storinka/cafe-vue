@@ -168,4 +168,6 @@ getCartTotal(): number;
 getCartItems(): CartItem[];
 
 makeCartItem(orderItem: OrderItemInputV3): CartItem;
+
+isDishInCart(dish: DishResultV3): boolean;
 ```

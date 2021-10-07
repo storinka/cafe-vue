@@ -360,6 +360,19 @@ export class Storinka {
             orderItem,
         } as CartItem;
     }
+
+    isDishInCart(dish: DishResultV3): boolean {
+        const dishInCart = this.cart.items.find(
+            (item) => item.item_type === 'dish' && item.item_id === dish.id,
+        );
+
+        const variantInCart = this.cart.items.find(
+            (item) => item.item_type === 'variant' && dish.variants.map((v) => v.id)
+                .includes(item.item_id),
+        );
+
+        return Boolean(dishInCart || variantInCart);
+    }
 }
 
 type ItemWithSlugOrHashId = MenuResultV3 | CategoryResultV3 | DishResultV3 | TagResultV3 | AdvertisementResultV3;
