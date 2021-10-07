@@ -1,4 +1,4 @@
-import { App, reactive } from "vue";
+import { App, reactive, watch } from "vue";
 import {
     AdvertisementResultV3,
     CafeResultV3,
@@ -23,6 +23,8 @@ export interface StorinkaOptions {
     apiVersion?: string;
     domain?: string;
     domains?: string[];
+
+    keepCart?: boolean;
 }
 
 export class ApiError {
@@ -37,6 +39,48 @@ export class ApiError {
     }
 }
 
+type JSONValue = number | string | boolean | null | { [key: string]: JSONValue; };
+
+export interface StorinkaStorage {
+    setItem(key: string, value: any): void;
+
+    removeItem(key: string): void;
+
+    getItem(key: string): JSONValue;
+}
+
+export class StorinkaLocalStorage implements StorinkaStorage {
+    static KEY_PREFIX = "__strk_";
+
+    getItem(key: string): JSONValue {
+        key = StorinkaLocalStorage.key(key);
+
+        const item = localStorage.getItem(key);
+
+        if (item == null) {
+            return null;
+        }
+
+        return JSON.parse(item);
+    }
+
+    removeItem(key: string): void {
+        key = StorinkaLocalStorage.key(key);
+
+        localStorage.removeItem(key);
+    }
+
+    setItem(key: string, value: any): void {
+        key = StorinkaLocalStorage.key(key);
+
+        localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    static key(key: string): string {
+        return StorinkaLocalStorage.KEY_PREFIX + key;
+    }
+}
+
 export class Storinka {
     options: StorinkaOptions;
 
@@ -47,6 +91,8 @@ export class Storinka {
     };
 
     cart: Cart;
+
+    storage: StorinkaStorage;
 
     constructor(options: StorinkaOptions) {
         this.options = options;
@@ -62,12 +108,40 @@ export class Storinka {
         if (!this.options.domains) {
             this.options.domains = [];
         }
+        if (this.options.keepCart === undefined) {
+            this.options.keepCart = true;
+        }
 
         this.state = reactive({
             isLoading: false,
         });
 
         this.cart = reactive(new Cart());
+
+        this.storage = new StorinkaLocalStorage();
+
+        if (this.options.keepCart) {
+            this.hydrateCart();
+
+            watch(this.cart, cart => {
+                this.storage.setItem("cart", cart);
+            }, { deep: true });
+        }
+    }
+
+    private hydrateCart(): void {
+        const cartStateFromStorage = this.storage.getItem("cart");
+        if (!cartStateFromStorage) {
+            return;
+        }
+
+        try {
+            Object.assign(this.cart, cartStateFromStorage);
+        } catch (e) {
+            console.error(e);
+
+            this.storage.removeItem("cart");
+        }
     }
 
     install(app: App): void {
