@@ -82,7 +82,7 @@ export class Storinka {
         this.state.isLoading = true;
         this.state.id = id;
 
-        return this.invoke("v3.getCafe", {
+        return this.invoke("getCafe", {
             id,
             language,
         })
