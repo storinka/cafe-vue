@@ -1,3 +1,5 @@
+import { OrderItemInputV3, OrderSubitemInputV3 } from "@storinka/cart";
+
 export interface CafeResultV3 {
     id: number;
     hash_id: string;
@@ -134,6 +136,8 @@ export interface CartSubitem {
     option: OptionResultV3;
     optionItem: OptionItemResultV3;
     total: number;
+
+    orderSubitem: OrderSubitemInputV3;
 }
 
 export interface CartItem {
@@ -142,4 +146,6 @@ export interface CartItem {
     quantity: number;
     total: number;
     subitems: CartSubitem[];
+
+    orderItem: OrderItemInputV3;
 }

@@ -337,6 +337,8 @@ export class Storinka {
                 optionItem,
 
                 total: optionItem.price,
+
+                orderSubitem,
             } as CartSubitem;
         });
 
@@ -354,6 +356,8 @@ export class Storinka {
             total,
 
             subitems,
+
+            orderItem,
         } as CartItem;
     }
 }
