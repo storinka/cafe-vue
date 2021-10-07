@@ -14,7 +14,7 @@ import {
     SetResultV3,
     TagResultV3
 } from "./types";
-import Cart from "@storinka/cart";
+import Cart, { OrderItemInputV3 } from "@storinka/cart";
 
 export * from "./types";
 
@@ -307,52 +307,54 @@ export class Storinka {
     }
 
     getCartItems(): CartItem[] {
-        return this.cart.items.map(orderItem => {
-            const dish = orderItem.item_type === "dish" ? this.getDish(orderItem.item_id) : this.getDishByVariant(orderItem.item_id);
-            if (!dish) {
-                throw new Error(`Dish ${orderItem.item_id} not found!`);
+        return this.cart.items.map(orderItem => this.makeCartItem(orderItem));
+    }
+
+    makeCartItem(orderItem: OrderItemInputV3): CartItem {
+        const dish = orderItem.item_type === "dish" ? this.getDish(orderItem.item_id) : this.getDishByVariant(orderItem.item_id);
+        if (!dish) {
+            throw new Error(`Dish ${orderItem.item_id} not found!`);
+        }
+
+        const variant = orderItem.item_type === "dish" ? this.getDishDefaultVariant(orderItem.item_id) : this.getVariant(orderItem.item_id);
+        if (!variant) {
+            throw new Error(`Variant ${orderItem.item_id} not found!`);
+        }
+
+        const subitems = orderItem.subitems.map(orderSubitem => {
+            const option = this.getOptionByItem(orderSubitem.item_id);
+            if (!option) {
+                throw new Error(`Option for item ${orderSubitem.item_id} not found!`);
             }
 
-            const variant = orderItem.item_type === "dish" ? this.getDishDefaultVariant(orderItem.item_id) : this.getVariant(orderItem.item_id);
-            if (!variant) {
-                throw new Error(`Variant ${orderItem.item_id} not found!`);
+            const optionItem = this.getOptionItem(orderSubitem.item_id);
+            if (!optionItem) {
+                throw new Error(`Option item ${orderSubitem.item_id} not found!`);
             }
-
-            const subitems = orderItem.subitems.map(orderSubitem => {
-                const option = this.getOptionByItem(orderSubitem.item_id);
-                if (!option) {
-                    throw new Error(`Option for item ${orderSubitem.item_id} not found!`);
-                }
-
-                const optionItem = this.getOptionItem(orderSubitem.item_id);
-                if (!optionItem) {
-                    throw new Error(`Option item ${orderSubitem.item_id} not found!`);
-                }
-
-                return {
-                    option,
-                    optionItem,
-
-                    total: optionItem.price,
-                } as CartSubitem;
-            });
-
-            const subitemsTotal: number = subitems.map(subitem => subitem.total)
-                .reduce((p, c) => p + c, 0);
-
-            const quantity = orderItem.quantity;
-            const total = (subitemsTotal + variant.price) * quantity;
 
             return {
-                dish,
-                variant,
+                option,
+                optionItem,
 
-                quantity,
-                total,
-
-                subitems,
-            } as CartItem;
+                total: optionItem.price,
+            } as CartSubitem;
         });
+
+        const subitemsTotal: number = subitems.map(subitem => subitem.total)
+            .reduce((p, c) => p + c, 0);
+
+        const quantity = orderItem.quantity;
+        const total = (subitemsTotal + variant.price) * quantity;
+
+        return {
+            dish,
+            variant,
+
+            quantity,
+            total,
+
+            subitems,
+        } as CartItem;
     }
 }
 

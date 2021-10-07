@@ -166,4 +166,6 @@ isCustomDomain(domain?: string): boolean;
 getCartTotal(): number;
 
 getCartItems(): CartItem[];
+
+makeCartItem(orderItem: OrderItemInputV3): CartItem;
 ```
