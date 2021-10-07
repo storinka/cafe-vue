@@ -17,7 +17,11 @@ import { createStorinka } from "@storinka/cafe-vue";
 
 const app = createApp();
 
-app.use(createStorinka());
+const storinka = createStorinka({
+    apiUrl: "https://api.storinka.menu",
+});
+
+app.use(storinka);
 ```
 
 ```vue
@@ -43,6 +47,31 @@ export default {
 </script>
 ```
 
+## Options
+
+### `apiUrl`:
+
+- Type: `string | undefined`
+- Default: `https://api.storinka.menu`
+
+### `apiVersion`:
+
+- Type: `string | undefined`
+- Default: `3`
+
+### `domain`:
+
+- Type: `string | undefined`
+- Examples: `localhost`, `storinka.menu`
+
+Current domain.
+
+### `domains`:
+
+- Type: `string[] | undefined`
+
+Additional Storinka's domains.
+
 ## Properties
 
 ### `state`:
@@ -63,16 +92,22 @@ Check [https://github.com/storinka/cart](https://github.com/storinka/cart) for m
 
 ## Functions
 
+### `invoke(name: string, params?: any)`
+
+- Result: `Promise<any>`
+
+Invoke a function.
+
 ### `setCafe(id: string, language: string)`
 
-Returns `Promise<CafeResultV3>`
+- Result: `Promise<CafeResultV3>`
 
 Sets current cafe by id. Id can be **hash id**, **slug** or **domain**.
 > If you are using a **domain** as id, you must add dollar sign (`$`) as prefix to it. Example: `$storinka.menu`.
 
 ### `setLanguage(language: string)`
 
-Returns `Promise<CafeResultV3>`
+- Result: `Promise<CafeResultV3>`
 
 Sets language for current cafe.
 

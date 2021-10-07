@@ -54,7 +54,7 @@ export class Storinka {
             this.options.apiUrl = "https://api.storinka.menu"
         }
         if (!this.options.apiVersion) {
-            this.options.apiVersion = "2";
+            this.options.apiVersion = "3";
         }
         if (!this.options.domain) {
             this.options.domain = location.hostname;

@@ -20,10 +20,10 @@
     "@babel/helper-validator-identifier" "^7.14.9"
     to-fast-properties "^2.0.0"
 
-"@storinka/cart@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@storinka/cart/-/cart-1.0.2.tgz#1aed9ee3955b5c9345ee3bcfa2dd210e3128a3ea"
-  integrity sha512-3zOPj9eAN+IqYcrKMQXCFpIr2pdy1vHtQkNItMasWiPN6+yfGqMVRW1H9jvk3TVBtF0sDpIRmkt3sNFhe56wiw==
+"@storinka/cart@^3":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@storinka/cart/-/cart-3.0.0.tgz#e66fc3b6a6782a511ac2d220a0834985b2e511d6"
+  integrity sha512-n6aFpjlRPnMbBDfbFUN+R2sL/0zuMZrN+RuYTvKPtPHAByguFcbCIyYPpO+ALwLHJeNbXSSUS94k6rGJJPCZkw==
 
 "@types/strip-bom@^3.0.0":
   version "3.0.0"
