@@ -72,6 +72,18 @@ Current domain.
 
 Additional Storinka's domains.
 
+### `keepCart`:
+
+- Type: `boolean | undefined`
+
+Keep cart state in storage.
+
+### `keepLanguage`:
+
+- Type: `boolean | undefined`
+
+Keep language in storage.
+
 ## Properties
 
 ### `state`:
@@ -89,6 +101,10 @@ Properties:
 Cart state object. Type: `Cart`.
 
 Check [https://github.com/storinka/cart](https://github.com/storinka/cart) for more info.
+
+### `storage`:
+
+Storage instance. Type: `StorinkaStorage`.
 
 ## Functions
 
@@ -170,4 +186,7 @@ getCartItems(): CartItem[];
 makeCartItem(orderItem: OrderItemInputV3): CartItem;
 
 isDishInCart(dish: DishResultV3): boolean;
+
+
+getBrowserLanguage(): string;
 ```

@@ -25,6 +25,7 @@ export interface StorinkaOptions {
     domains?: string[];
 
     keepCart?: boolean;
+    keepLanguage?: boolean;
 }
 
 export class ApiError {
@@ -46,18 +47,22 @@ export interface StorinkaStorage {
 
     removeItem(key: string): void;
 
-    getItem(key: string): JSONValue;
+    getItem(key: string, defaultValue?: JSONValue): JSONValue;
 }
 
 export class StorinkaLocalStorage implements StorinkaStorage {
     static KEY_PREFIX = "__strk_";
 
-    getItem(key: string): JSONValue {
+    getItem(key: string, defaultValue?: JSONValue): JSONValue {
         key = StorinkaLocalStorage.key(key);
 
         const item = localStorage.getItem(key);
 
         if (item == null) {
+            if (defaultValue !== undefined) {
+                return defaultValue;
+            }
+
             return null;
         }
 
@@ -88,6 +93,7 @@ export class Storinka {
         isLoading: boolean;
         id?: string;
         cafe?: CafeResultV3;
+        language: string;
     };
 
     cart: Cart;
@@ -111,9 +117,13 @@ export class Storinka {
         if (this.options.keepCart === undefined) {
             this.options.keepCart = true;
         }
+        if (this.options.keepLanguage === undefined) {
+            this.options.keepLanguage = true;
+        }
 
         this.state = reactive({
             isLoading: false,
+            language: this.getBrowserLanguage(),
         });
 
         this.cart = reactive(new Cart());
@@ -127,20 +137,15 @@ export class Storinka {
                 this.storage.setItem("cart", cart);
             }, { deep: true });
         }
-    }
 
-    private hydrateCart(): void {
-        const cartStateFromStorage = this.storage.getItem("cart");
-        if (!cartStateFromStorage) {
-            return;
-        }
+        if (this.options.keepLanguage) {
+            const languageFromStorage = this.storage.getItem("language");
 
-        try {
-            Object.assign(this.cart, cartStateFromStorage);
-        } catch (e) {
-            console.error(e);
-
-            this.storage.removeItem("cart");
+            if (typeof languageFromStorage === "string" && languageFromStorage.length === 2) {
+                this.state.language = languageFromStorage;
+            } else {
+                this.storage.removeItem("language");
+            }
         }
     }
 
@@ -155,6 +160,9 @@ export class Storinka {
     setCafe(id: string, language: string): Promise<CafeResultV3> {
         this.state.isLoading = true;
         this.state.id = id;
+        
+        this.state.language = language;
+        this.storage.setItem("language", language);
 
         return this.invoke("getCafe", {
             id,
@@ -172,6 +180,9 @@ export class Storinka {
 
     setLanguage(language: string): Promise<CafeResultV3> {
         this.state.isLoading = true;
+
+        this.state.language = language;
+        this.storage.setItem("language", language);
 
         return this.invoke("getCafe", {
             id: this.state.id,
@@ -446,6 +457,31 @@ export class Storinka {
         );
 
         return Boolean(dishInCart || variantInCart);
+    }
+
+    getBrowserLanguage(): string {
+        let language: string = "en";
+
+        if (navigator.language) {
+            language = navigator.language.slice(0, 2);
+        }
+
+        return language;
+    }
+
+    private hydrateCart(): void {
+        const cartStateFromStorage = this.storage.getItem("cart");
+        if (!cartStateFromStorage) {
+            return;
+        }
+
+        try {
+            Object.assign(this.cart, cartStateFromStorage);
+        } catch (e) {
+            console.error(e);
+
+            this.storage.removeItem("cart");
+        }
     }
 }
 
