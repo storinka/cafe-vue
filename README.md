@@ -84,6 +84,12 @@ Keep cart state in storage.
 
 Keep language in storage.
 
+### `loadSkinConfig`:
+
+- Type: `boolean | undefined`
+
+Load skin config after cafe was loaded.
+
 ## Properties
 
 ### `state`:
@@ -92,9 +98,11 @@ Current state which contains info about current cafe.
 
 Properties:
 
-- `cafe` - cafe object; type: `CafeResultV3`.
-- `id` - id by which the cafe was loaded; type: `string`;
+- `cafe` - cafe object; type: `CafeResultV3 | undefined`.
+- `id` - id by which the cafe was loaded; type: `string | undefined`;
 - `isLoading` - is cafe currently loading; type: `boolean`;
+- `language` - : current language; type: `string`;
+- `skinConfig` - skin config; type: `any | undefined`;
 
 ### `cart`:
 
@@ -126,6 +134,12 @@ Sets current cafe by id. Id can be **hash id**, **slug** or **domain**.
 - Result: `Promise<CafeResultV3>`
 
 Sets language for current cafe.
+
+### `loadSkinConfig()`
+
+- Result: `Promise<any>`
+
+Load skin config.
 
 ### Other functions:
 

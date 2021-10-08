@@ -172,7 +172,11 @@ export class Storinka {
         app.config.globalProperties.$storinka = this;
     }
 
-    setCafe(id: string, language: string): Promise<CafeResultV3> {
+    setCafe(id: string, language?: string): Promise<CafeResultV3> {
+        if (!language) {
+            language = this.state.language;
+        }
+
         this.state.isLoading = true;
         this.state.id = id;
 
