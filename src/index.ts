@@ -304,6 +304,18 @@ export class Storinka {
             .find(variant => variant.id === 0);
     }
 
+    getDishDiscount(dishOrId: DishResultV3 | number): DiscountResultV3 | null | undefined {
+        const dish = typeof dishOrId === "number" ? this.getDish(dishOrId) : dishOrId;
+
+        if (!dish) {
+            return null;
+        }
+
+        return (this.state.cafe?.discounts ?? []).find((discount: DiscountResultV3) => {
+            return discount.included_dishes_ids.includes(dish.id);
+        });
+    }
+
     getVariant(variantId: number): DishVariantResultV3 | undefined {
         if (variantId === 0) {
             throw new Error("Variant id cannot be zero.")
@@ -517,6 +529,28 @@ export class Storinka {
         }
 
         return language;
+    }
+
+    getPriceAfterDiscount(price: number, discount: DiscountResultV3): number {
+        let newPrice = price;
+
+        if (discount.type === "percentage") {
+            newPrice = price - (price * discount.value / 100);
+        } else if (discount.type === "absolute" || discount.type === "diff") {
+            newPrice = price - discount.value;
+        } else if (discount.type === "value") {
+            newPrice = discount.value;
+        }
+
+        if (discount.round === "small") {
+            return Math.floor(newPrice);
+        }
+
+        if (discount.round === "large") {
+            return Math.ceil(newPrice);
+        }
+
+        return newPrice;
     }
 
     private hydrateCart(): void {

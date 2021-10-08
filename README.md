@@ -154,6 +154,8 @@ getDishByVariant(variantId: number): DishResultV3 | undefined;
 
 getDishDefaultVariant(dishOrId: number | DishResultV3): DishVariantResultV3 | undefined;
 
+getDishDiscount(dish: DishResultV3): DiscountResultV3 | null | undefined;
+
 getVariant(variantId: number): DishVariantResultV3 | undefined;
 
 getOption(optionId: number): OptionResultV3 | undefined;
@@ -203,4 +205,6 @@ isDishInCart(dish: DishResultV3): boolean;
 
 
 getBrowserLanguage(): string;
+
+getPriceAfterDiscount(price: number, discount: DiscountResultV3): number;
 ```
