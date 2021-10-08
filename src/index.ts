@@ -71,6 +71,14 @@ export class StorinkaLocalStorage implements StorinkaStorage {
             return null;
         }
 
+        if (item === "undefined") {
+            return null;
+        }
+
+        if (!item.startsWith("\"") && !item.startsWith("{") && item.startsWith("[")) {
+            return item;
+        }
+
         return JSON.parse(item);
     }
 
