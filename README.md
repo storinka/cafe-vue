@@ -197,6 +197,8 @@ isCustomDomain(domain?: string): boolean;
 
 getCartTotal(): number;
 
+getCartTotalAfterDiscounts(): number;
+
 getCartItems(): CartItem[];
 
 makeCartItem(orderItem: OrderItemInputV3): CartItem;

@@ -453,6 +453,12 @@ export class Storinka {
             .reduce((p, c) => p + c, 0);
     }
 
+    getCartTotalAfterDiscounts(): number {
+        return this.getCartItems()
+            .map(item => item.totalAfterDiscounts)
+            .reduce((p, c) => p + c, 0);
+    }
+
     getCartItems(): CartItem[] {
         return this.cart.items.map(orderItem => this.makeCartItem(orderItem));
     }
@@ -494,6 +500,12 @@ export class Storinka {
 
         const quantity = orderItem.quantity;
         const total = (subitemsTotal + variant.price) * quantity;
+        let totalAfterDiscounts = total;
+
+        const discount = this.getDishDiscount(dish);
+        if (discount) {
+            totalAfterDiscounts = this.getPriceAfterDiscount(total, discount);
+        }
 
         return {
             dish,
@@ -501,6 +513,7 @@ export class Storinka {
 
             quantity,
             total,
+            totalAfterDiscounts,
 
             subitems,
 

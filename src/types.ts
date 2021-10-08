@@ -160,6 +160,7 @@ export interface CartItem {
     variant: DishVariantResultV3;
     quantity: number;
     total: number;
+    totalAfterDiscounts: number;
     subitems: CartSubitem[];
 
     orderItem: OrderItemInputV3;
