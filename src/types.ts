@@ -21,6 +21,7 @@ export interface CafeResultV3 {
     discounts: Array<DiscountResultV3>;
     advertisements: Array<AdvertisementResultV3>;
     languages: Array<string>;
+    addresses: Array<CafeAddressResultV3>;
 }
 
 export interface CafeSettingsResultV3 {
@@ -30,9 +31,9 @@ export interface CafeSettingsResultV3 {
 }
 
 export interface CafeExtensionsResultV3 {
-    orders?: null | any;
-    cart?: null | any;
-    feedback?: null | any;
+    orders?: null | CafeExtensionResultV3;
+    cart?: null | CafeExtensionResultV3;
+    feedback?: null | CafeExtensionResultV3;
 }
 
 export interface MenuResultV3 {
@@ -130,6 +131,20 @@ export interface AdvertisementResultV3 {
     short: string;
     full?: null | string;
     color: string;
+}
+
+export interface CafeExtensionResultV3 {
+    version: string;
+}
+
+export interface CafeAddressResultV3 {
+    id: number;
+    hash_id: string;
+    name: string;
+    address: string;
+    slug: string;
+    lat: number;
+    lng: number;
 }
 
 export interface CartSubitem {

@@ -21,11 +21,16 @@ export * from "./types";
 export interface StorinkaOptions {
     apiUrl?: string;
     apiVersion?: string;
+    skinsApiUrl?: string;
+    skinsApiVersion?: string;
+
     domain?: string;
     domains?: string[];
 
     keepCart?: boolean;
     keepLanguage?: boolean;
+
+    loadSkinConfig?: boolean;
 }
 
 export class ApiError {
@@ -94,6 +99,7 @@ export class Storinka {
         id?: string;
         cafe?: CafeResultV3;
         language: string;
+        skinConfig?: any;
     };
 
     cart: Cart;
@@ -108,6 +114,12 @@ export class Storinka {
         if (!this.options.apiVersion) {
             this.options.apiVersion = "3";
         }
+        if (!this.options.skinsApiUrl) {
+            this.options.skinsApiUrl = "https://skins.storinka.menu"
+        }
+        if (!this.options.skinsApiVersion) {
+            this.options.skinsApiVersion = "1";
+        }
         if (!this.options.domain) {
             this.options.domain = location.hostname;
         }
@@ -119,6 +131,9 @@ export class Storinka {
         }
         if (this.options.keepLanguage === undefined) {
             this.options.keepLanguage = true;
+        }
+        if (this.options.loadSkinConfig === undefined) {
+            this.options.loadSkinConfig = true;
         }
 
         this.state = reactive({
@@ -160,7 +175,7 @@ export class Storinka {
     setCafe(id: string, language: string): Promise<CafeResultV3> {
         this.state.isLoading = true;
         this.state.id = id;
-        
+
         this.state.language = language;
         this.storage.setItem("language", language);
 
@@ -168,8 +183,12 @@ export class Storinka {
             id,
             language,
         })
-            .then((cafe) => {
+            .then(async (cafe) => {
                 this.state.cafe = cafe;
+
+                if (this.options.loadSkinConfig) {
+                    await this.loadSkinConfig();
+                }
 
                 return cafe;
             })
@@ -198,9 +217,20 @@ export class Storinka {
             });
     }
 
-    invoke(name: string, params: any = {}): Promise<any> {
+    loadSkinConfig(): Promise<any> {
+        return this.invokeSkins("getSkinCafeConfig", {
+            cafe_id: this.state.cafe?.id,
+            skin_slug: this.state.cafe?.settings.skin,
+        }).then(skinConfig => {
+            this.state.skinConfig = skinConfig;
+
+            return skinConfig;
+        });
+    }
+
+    protected generalInvoke(url: string, version: string, name: string, params: any = {}): Promise<any> {
         return fetch(
-            `${this.options.apiUrl}/invoke/${this.options.apiVersion}/${name}`,
+            `${url}/invoke/${version}/${name}`,
             {
                 method: "post",
                 headers: {
@@ -221,6 +251,14 @@ export class Storinka {
             })
             .then((r) => r.json())
             .then((r) => r.result);
+    }
+
+    invoke(name: string, params: any = {}): Promise<any> {
+        return this.generalInvoke(this.options.apiUrl as string, this.options.apiVersion as string, name, params);
+    }
+
+    invokeSkins(name: string, params: any = {}): Promise<any> {
+        return this.generalInvoke(this.options.skinsApiUrl as string, this.options.skinsApiVersion as string, name, params);
     }
 
     getMenu(menuId: number | string): MenuResultV3 | undefined {
