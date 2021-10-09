@@ -22,6 +22,7 @@ export interface CafeResultV3 {
     advertisements: Array<AdvertisementResultV3>;
     languages: Array<string>;
     addresses: Array<CafeAddressResultV3>;
+    workdays: Array<CafeWorkdayResultV3>;
 }
 
 export interface CafeSettingsResultV3 {
@@ -145,6 +146,15 @@ export interface CafeAddressResultV3 {
     slug: string;
     lat: number;
     lng: number;
+}
+
+export interface CafeWorkdayResultV3 {
+    day: string;
+    open: boolean;
+    start_h: number;
+    start_m: number;
+    end_h: number;
+    end_m: number;
 }
 
 export interface CartSubitem {
