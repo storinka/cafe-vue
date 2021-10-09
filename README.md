@@ -209,4 +209,7 @@ isDishInCart(dish: DishResultV3): boolean;
 getBrowserLanguage(): string;
 
 getPriceAfterDiscount(price: number, discount: DiscountResultV3): number;
+
+
+sendReview(params: SendReviewParams): Promise<ReviewResultV3>;
 ```

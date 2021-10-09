@@ -570,6 +570,8 @@ export class Storinka {
 
     sendReview(params: SendReviewParams): Promise<ReviewResultV3> {
         return this.invoke("sendReview", {
+            cafe_id: this.state.id,
+            
             private: params.private,
             name: params.name,
             contact: params.contact,
