@@ -23,6 +23,7 @@ export interface CafeResultV3 {
     languages: Array<string>;
     addresses: Array<CafeAddressResultV3>;
     workdays: Array<CafeWorkdayResultV3>;
+    contacts: Array<CafeContactResultV3>;
 }
 
 export interface CafeSettingsResultV3 {
@@ -155,6 +156,11 @@ export interface CafeWorkdayResultV3 {
     start_m: number;
     end_h: number;
     end_m: number;
+}
+
+export interface CafeContactResultV3 {
+    type: string;
+    value: string;
 }
 
 export interface CartSubitem {
