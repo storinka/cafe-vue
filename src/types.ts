@@ -163,6 +163,14 @@ export interface CafeContactResultV3 {
     value: string;
 }
 
+export interface ReviewResultV3 {
+    id: number;
+    name: string;
+    contact: string;
+    stars: number;
+    message: string;
+}
+
 export interface CartSubitem {
     option: OptionResultV3;
     optionItem: OptionItemResultV3;
@@ -180,4 +188,12 @@ export interface CartItem {
     subitems: CartSubitem[];
 
     orderItem: OrderItemInputV3;
+}
+
+export interface SendReviewParams {
+    private: boolean;
+    name: string;
+    contact: string;
+    message: string;
+    stars: number;
 }

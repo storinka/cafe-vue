@@ -11,6 +11,8 @@ import {
     MenuResultV3,
     OptionItemResultV3,
     OptionResultV3,
+    ReviewResultV3,
+    SendReviewParams,
     SetResultV3,
     TagResultV3
 } from "./types";
@@ -564,6 +566,16 @@ export class Storinka {
         }
 
         return newPrice;
+    }
+
+    sendReview(params: SendReviewParams): Promise<ReviewResultV3> {
+        return this.invoke("sendReview", {
+            private: params.private,
+            name: params.name,
+            contact: params.contact,
+            message: params.message,
+            stars: params.stars,
+        });
     }
 
     private hydrateCart(): void {
