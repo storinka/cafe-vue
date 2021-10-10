@@ -159,7 +159,7 @@ export class Storinka {
             this.hydrateCart();
 
             watch(this.cart, cart => {
-                this.storage.setItem("cart", cart);
+                this.storage.setItem(this.storageKey("cart"), cart);
             }, { deep: true });
         }
 
@@ -581,7 +581,7 @@ export class Storinka {
     }
 
     private hydrateCart(): void {
-        const cartStateFromStorage = this.storage.getItem("cart");
+        const cartStateFromStorage = this.storage.getItem(this.storageKey("cart"));
         if (!cartStateFromStorage) {
             return;
         }
@@ -591,8 +591,14 @@ export class Storinka {
         } catch (e) {
             console.error(e);
 
-            this.storage.removeItem("cart");
+            this.storage.removeItem(this.storageKey("cart"));
         }
+    }
+
+    private storageKey(key: string) {
+        const cafeId = this.state.cafe?.id;
+
+        return `${cafeId}_${key}`;
     }
 }
 
