@@ -20,6 +20,12 @@ import Cart, { OrderItemInputV3 } from "@storinka/cart";
 
 export * from "./types";
 
+export interface StorinkaImagePlaceholdersOption {
+    dish: string;
+    category: string;
+    menu: string;
+}
+
 export interface StorinkaOptions {
     apiUrl?: string;
     apiVersion?: string;
@@ -33,6 +39,8 @@ export interface StorinkaOptions {
     keepLanguage?: boolean;
 
     loadSkinConfig?: boolean;
+
+    imagePlaceholders?: StorinkaImagePlaceholdersOption;
 }
 
 export class ApiError {
@@ -144,6 +152,13 @@ export class Storinka {
         }
         if (this.options.loadSkinConfig === undefined) {
             this.options.loadSkinConfig = true;
+        }
+        if (this.options.imagePlaceholders === undefined) {
+            this.options.imagePlaceholders = {
+                dish: "",
+                category: "",
+                menu: "",
+            } as StorinkaImagePlaceholdersOption;
         }
 
         this.state = reactive({
@@ -578,6 +593,69 @@ export class Storinka {
             message: params.message,
             stars: params.stars,
         });
+    }
+
+    getDishImageUrl(dishOrId: DishResultV3 | number, size?: number): string {
+        const placeholder = this.options.imagePlaceholders?.dish ?? "";
+
+        const dish = typeof dishOrId === "number" ? this.getDish(dishOrId) : dishOrId;
+        if (!dish) {
+            return this.getSizedImageUrl(placeholder, size);
+        }
+
+        if (!dish.image) {
+            return this.getSizedImageUrl(placeholder, size);
+        }
+
+        return this.getSizedImageUrl(dish.image, size);
+    }
+
+    getCategoryImageUrl(categoryOrId: CategoryResultV3 | number, size?: number): string {
+        const placeholder = this.options.imagePlaceholders?.category ?? "";
+
+        const category = typeof categoryOrId === "number" ? this.getCategory(categoryOrId) : categoryOrId;
+        if (!category) {
+            return this.getSizedImageUrl(placeholder, size);
+        }
+
+        if (!category.image) {
+            let image = placeholder;
+
+            // find first dish with image
+            for (const dish of this.getCategoryDishes(category)) {
+                if (dish.image) {
+                    image = dish.image;
+                    break
+                }
+            }
+
+            return this.getSizedImageUrl(image, size);
+        }
+
+        return this.getSizedImageUrl(category.image, size);
+    }
+
+    getMenuImageUrl(menuOrId: MenuResultV3 | number, size?: number): string {
+        const placeholder = this.options.imagePlaceholders?.menu ?? "";
+
+        const menu = typeof menuOrId === "number" ? this.getMenu(menuOrId) : menuOrId;
+        if (!menu) {
+            return this.getSizedImageUrl(placeholder, size);
+        }
+
+        if (!menu.image) {
+            return this.getSizedImageUrl(placeholder, size);
+        }
+
+        return this.getSizedImageUrl(menu.image, size);
+    }
+
+    getSizedImageUrl(url: string, size?: number): string {
+        if (size) {
+            return `${url}?s=${size}`;
+        }
+
+        return url;
     }
 
     private hydrateCart(): void {

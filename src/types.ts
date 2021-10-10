@@ -44,6 +44,7 @@ export interface MenuResultV3 {
     slug?: null | string;
     name: string;
     description?: null | string;
+    image?: null | string;
     categories_ids: Array<number>;
 }
 
@@ -53,6 +54,7 @@ export interface CategoryResultV3 {
     slug?: null | string;
     name: string;
     description?: null | string;
+    image?: null | string;
     dishes_ids: Array<number>;
 }
 

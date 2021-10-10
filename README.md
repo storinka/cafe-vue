@@ -90,6 +90,12 @@ Keep language in storage.
 
 Load skin config after cafe was loaded.
 
+### `imagePlaceholders`:
+
+- Type: `StorinkaImagePlaceholdersOption | undefined`
+
+Provide image placeholders.
+
 ## Properties
 
 ### `state`:
@@ -212,4 +218,13 @@ getPriceAfterDiscount(price: number, discount: DiscountResultV3): number;
 
 
 sendReview(params: SendReviewParams): Promise<ReviewResultV3>;
+
+
+getDishImageUrl(dishOrId: DishResultV3 | number, size?: number): string;
+
+getCategoryImageUrl(categoryOrId: CategoryResultV3 | number, size?: number): string;
+
+getMenuImageUrl(menuOrId: MenuResultV3 | number, size?: number): string;
+
+getSizedImageUrl(url: string, size?: number): string;
 ```
