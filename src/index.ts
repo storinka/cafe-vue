@@ -43,12 +43,14 @@ export interface StorinkaOptions {
     imagePlaceholders?: StorinkaImagePlaceholdersOption;
 }
 
-export class ApiError {
+export class ApiError extends Error {
     code: number;
     name: string;
     message: string;
 
     constructor(code: number, name: string, message: string) {
+        super(message);
+
         this.code = code;
         this.name = name;
         this.message = message;
@@ -207,6 +209,8 @@ export class Storinka {
         this.state.language = language;
         this.storage.setItem("language", language);
 
+        this.state.loadingError = undefined;
+
         return this.invoke("getCafe", {
             id,
             language,
@@ -239,6 +243,8 @@ export class Storinka {
 
         this.state.language = language;
         this.storage.setItem("language", language);
+
+        this.state.loadingError = undefined;
 
         return this.invoke("getCafe", {
             id: this.state.id,
