@@ -118,6 +118,7 @@ export class Storinka {
         cafe?: CafeResultV3;
         language: string;
         skinConfig?: any;
+        loadingError?: Error | ApiError | any;
     };
 
     cart: Cart;
@@ -210,6 +211,11 @@ export class Storinka {
             id,
             language,
         })
+            .catch(error => {
+                this.state.loadingError = error;
+
+                throw error;
+            })
             .then(async (cafe) => {
                 this.state.cafe = cafe;
 
@@ -225,7 +231,7 @@ export class Storinka {
             })
             .finally(() => {
                 this.state.isLoading = false;
-            });
+            })
     }
 
     setLanguage(language: string): Promise<CafeResultV3> {
@@ -238,6 +244,11 @@ export class Storinka {
             id: this.state.id,
             language,
         })
+            .catch(error => {
+                this.state.loadingError = error;
+
+                throw error;
+            })
             .then((cafe) => {
                 this.state.cafe = cafe;
 
