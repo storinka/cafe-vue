@@ -171,8 +171,6 @@ export class Storinka {
         this.storage = new StorinkaLocalStorage();
 
         if (this.options.keepCart) {
-            this.hydrateCart();
-
             watch(this.cart, cart => {
                 this.storage.setItem(this.storageKey("cart"), cart);
             }, { deep: true });
@@ -217,6 +215,10 @@ export class Storinka {
 
                 if (this.options.loadSkinConfig) {
                     await this.loadSkinConfig();
+                }
+
+                if (this.options.keepCart) {
+                    this.hydrateCart();
                 }
 
                 return cafe;
