@@ -113,11 +113,14 @@ export class StorinkaLocalStorage implements StorinkaStorage {
 }
 
 interface StorinkaIndices {
-    dishesById: Map<number | string, DishResultV3>;
-    categoriesById: Map<number | string, CategoryResultV3>;
+    dishById: Map<number | string, DishResultV3>;
+    categoryById: Map<number | string, CategoryResultV3>;
+    variantById: Map<number | string, DishVariantResultV3>;
 
     categoriesByMenu: Map<MenuResultV3, CategoryResultV3[]>;
     dishesByCategory: Map<CategoryResultV3, DishResultV3[]>;
+
+    dishByVariant: Map<DishVariantResultV3, DishResultV3>;
 }
 
 export class Storinka {
@@ -226,6 +229,8 @@ export class Storinka {
 
         this.state.loadingError = undefined;
 
+        this.indexed = false;
+
         return this.invoke("getCafe", {
             id,
             language,
@@ -262,6 +267,8 @@ export class Storinka {
         this.storage.setItem("language", language);
 
         this.state.loadingError = undefined;
+
+        this.indexed = false;
 
         return this.invoke("getCafe", {
             id: this.state.id,
@@ -335,7 +342,7 @@ export class Storinka {
 
     getCategory(categoryId: number | string): CategoryResultV3 | undefined {
         if (this.indexed) {
-            return this.indices.categoriesById.get(categoryId);
+            return this.indices.categoryById.get(categoryId);
         }
 
         return (this.state.cafe?.categories ?? [])
@@ -344,7 +351,7 @@ export class Storinka {
 
     getDish(dishId: number | string): DishResultV3 | undefined {
         if (this.indexed) {
-            return this.indices.dishesById.get(dishId);
+            return this.indices.dishById.get(dishId);
         }
 
         return (this.state.cafe?.dishes ?? [])
@@ -354,6 +361,15 @@ export class Storinka {
     getDishByVariant(variantId: number): DishResultV3 | undefined {
         if (variantId === 0) {
             throw new Error("Variant id cannot be zero.")
+        }
+
+        if (this.indexed) {
+            const variant = this.getVariant(variantId);
+            if (!variant) {
+                return undefined;
+            }
+
+            return this.indices.dishByVariant.get(variant);
         }
 
         return (this.state.cafe?.dishes ?? [])
@@ -382,6 +398,10 @@ export class Storinka {
     getVariant(variantId: number): DishVariantResultV3 | undefined {
         if (variantId === 0) {
             throw new Error("Variant id cannot be zero.")
+        }
+
+        if (this.indexed) {
+            return this.indices.variantById.get(variantId);
         }
 
         return this.state.cafe?.dishes
@@ -757,11 +777,14 @@ export class Storinka {
             this.indexed = false;
 
             return {
-                categoriesById: new Map(),
-                dishesById: new Map(),
+                categoryById: new Map(),
+                dishById: new Map(),
+                variantById: new Map(),
 
                 categoriesByMenu: new Map(),
                 dishesByCategory: new Map(),
+
+                dishByVariant: new Map(),
             }
         }
 
@@ -785,6 +808,14 @@ export class Storinka {
             }
         });
 
+        const variantsById: Map<number | string, DishVariantResultV3> = new Map();
+        cafe.dishes
+            .flatMap(dish => dish.variants)
+            .filter(variant => variant.id !== 0)
+            .forEach(variant => {
+                variantsById.set(variant.id, variant);
+            });
+
         const categoriesByMenu: Map<MenuResultV3, CategoryResultV3[]> = new Map();
         cafe.menus.forEach(menu => {
             categoriesByMenu.set(menu, this.getMenuCategories(menu));
@@ -795,14 +826,25 @@ export class Storinka {
             dishesByCategory.set(category, this.getCategoryDishes(category));
         });
 
+        const dishByVariant: Map<DishVariantResultV3, DishResultV3> = new Map();
+        cafe.dishes
+            .flatMap(dish => dish.variants.map(variant => ({ variant, dish })))
+            .filter(({ variant }) => variant.id !== 0)
+            .forEach(({ variant, dish }) => {
+                dishByVariant.set(variant, dish);
+            });
+
         this.indexed = true;
 
         return this.indices = {
-            categoriesById,
-            dishesById,
+            categoryById: categoriesById,
+            dishById: dishesById,
+            variantById: variantsById,
 
             categoriesByMenu,
             dishesByCategory,
+
+            dishByVariant,
         };
     }
 }
