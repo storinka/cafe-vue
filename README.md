@@ -227,4 +227,7 @@ getCategoryImageUrl(categoryOrId: CategoryResultV3 | number, size?: number): str
 getMenuImageUrl(menuOrId: MenuResultV3 | number, size?: number): string;
 
 getSizedImageUrl(url: string, size?: number): string;
+
+
+checkDeliveryAddress(lat: number, lng: number): Promise<DeliveryZoneResultV2 | null>;
 ```

@@ -32,12 +32,6 @@ export interface CafeSettingsResultV3 {
     skin: string;
 }
 
-export interface CafeExtensionsResultV3 {
-    orders?: null | CafeExtensionResultV3;
-    cart?: null | CafeExtensionResultV3;
-    feedback?: null | CafeExtensionResultV3;
-}
-
 export interface MenuResultV3 {
     id: number;
     hash_id: string;
@@ -171,6 +165,62 @@ export interface ReviewResultV3 {
     contact: string;
     stars: number;
     message: string;
+}
+
+export interface CafeExtensionsResultV3 {
+    orders?: null | OrdersCafeExtensionResultV3;
+    cart?: null | CafeExtensionResultV3;
+    feedback?: null | CafeExtensionResultV3;
+}
+
+export interface OrdersCafeExtensionResultV3 {
+    is_enabled_in_menu: boolean;
+    payment: OrdersCafeExtensionPaymentResultV3;
+    delivery: OrdersCafeExtensionDeliveryResultV3;
+    takeout: OrdersCafeExtensionTakeoutResultV3;
+    version: string;
+}
+
+export interface OrdersCafeExtensionPaymentResultV3 {
+    terminal: OrdersCafeExtensionPaymentPreferencesResultV3;
+    cash: OrdersCafeExtensionPaymentPreferencesResultV3;
+    fondy: OrdersCafeExtensionPaymentPreferencesResultV3;
+}
+
+export interface OrdersCafeExtensionPaymentPreferencesResultV3 {
+    is_enabled: boolean;
+}
+
+export interface OrdersCafeExtensionPaymentPreferencesResultV3 {
+    is_enabled: boolean;
+}
+
+export interface OrdersCafeExtensionPaymentPreferencesResultV3 {
+    is_enabled: boolean;
+}
+
+export interface OrdersCafeExtensionDeliveryResultV3 {
+    is_enabled: boolean;
+}
+
+export interface OrdersCafeExtensionTakeoutResultV3 {
+    is_enabled: boolean;
+    addresses: Array<OrdersCafeExtensionTakeoutAddressResultV3>;
+}
+
+export interface OrdersCafeExtensionTakeoutAddressResultV3 {
+    id: number;
+    name: string;
+    lat: number;
+    lng: number;
+}
+
+export interface DeliveryZoneResultV2 {
+    id: number;
+    name: string;
+    price?: null | number;
+    approximate_time: number;
+    coordinates: number[][];
 }
 
 export interface CartSubitem {

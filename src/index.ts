@@ -5,6 +5,7 @@ import {
     CartItem,
     CartSubitem,
     CategoryResultV3,
+    DeliveryZoneResultV2,
     DiscountResultV3,
     DishResultV3,
     DishVariantResultV3,
@@ -675,6 +676,24 @@ export class Storinka {
         }
 
         return url;
+    }
+
+    checkDeliveryAddress(lat: number, lng: number): Promise<DeliveryZoneResultV2 | null> {
+        return this.invoke("getDeliveryZoneByCoordinates", {
+            cafe_id: this.state.cafe?.id,
+            lat,
+            lng
+        }).then(deliveryZone => {
+            return deliveryZone as DeliveryZoneResultV2;
+        }).catch(error => {
+            if (error instanceof ApiError) {
+                if (error.name === "DELIVERY_ZONE_NOT_FOUND") {
+                    return null;
+                }
+            }
+
+            throw error;
+        });
     }
 
     private hydrateCart(): void {
