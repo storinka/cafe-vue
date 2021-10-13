@@ -112,7 +112,18 @@ export class StorinkaLocalStorage implements StorinkaStorage {
     }
 }
 
+interface StorinkaIndices {
+    dishesById: Map<number | string, DishResultV3>;
+    categoriesById: Map<number | string, CategoryResultV3>;
+
+    categoriesByMenu: Map<MenuResultV3, CategoryResultV3[]>;
+    dishesByCategory: Map<CategoryResultV3, DishResultV3[]>;
+}
+
 export class Storinka {
+    private indexed: boolean;
+    private indices: StorinkaIndices;
+
     options: StorinkaOptions;
 
     state: {
@@ -189,6 +200,9 @@ export class Storinka {
                 this.storage.removeItem("language");
             }
         }
+
+        this.indexed = false;
+        this.indices = this.reindex();
     }
 
     install(app: App): void {
@@ -224,6 +238,8 @@ export class Storinka {
             .then(async (cafe) => {
                 this.state.cafe = cafe;
 
+                this.reindex();
+
                 if (this.options.loadSkinConfig) {
                     await this.loadSkinConfig();
                 }
@@ -258,6 +274,8 @@ export class Storinka {
             })
             .then((cafe) => {
                 this.state.cafe = cafe;
+
+                this.reindex();
 
                 return cafe;
             })
@@ -316,11 +334,19 @@ export class Storinka {
     }
 
     getCategory(categoryId: number | string): CategoryResultV3 | undefined {
+        if (this.indexed) {
+            return this.indices.categoriesById.get(categoryId);
+        }
+
         return (this.state.cafe?.categories ?? [])
             .find(category => this.checkItemId(category, categoryId));
     }
 
     getDish(dishId: number | string): DishResultV3 | undefined {
+        if (this.indexed) {
+            return this.indices.dishesById.get(dishId);
+        }
+
         return (this.state.cafe?.dishes ?? [])
             .find(dish => this.checkItemId(dish, dishId));
     }
@@ -406,6 +432,10 @@ export class Storinka {
             return [];
         }
 
+        if (this.indexed) {
+            return this.indices.categoriesByMenu.get(menu) ?? [];
+        }
+
         return menu.categories_ids
             .map(categoryId => this.getCategory(categoryId))
             .filter(category => category) as CategoryResultV3[];
@@ -416,6 +446,10 @@ export class Storinka {
 
         if (!category) {
             return [];
+        }
+
+        if (this.indexed) {
+            return this.indices.dishesByCategory.get(category) ?? [];
         }
 
         return category.dishes_ids
@@ -715,6 +749,61 @@ export class Storinka {
         const cafeId = this.state.cafe?.id;
 
         return `${cafeId}_${key}`;
+    }
+
+    private reindex(): StorinkaIndices {
+        const cafe = this.state.cafe;
+        if (!cafe) {
+            this.indexed = false;
+
+            return {
+                categoriesById: new Map(),
+                dishesById: new Map(),
+
+                categoriesByMenu: new Map(),
+                dishesByCategory: new Map(),
+            }
+        }
+
+        const categoriesById: Map<number | string, CategoryResultV3> = new Map();
+        cafe.categories.forEach(category => {
+            categoriesById.set(category.id, category);
+            categoriesById.set(category.hash_id, category);
+
+            if (category.slug) {
+                categoriesById.set(category.slug, category);
+            }
+        });
+
+        const dishesById: Map<number | string, DishResultV3> = new Map();
+        cafe.dishes.forEach(dish => {
+            dishesById.set(dish.id, dish);
+            dishesById.set(dish.hash_id, dish);
+
+            if (dish.slug) {
+                dishesById.set(dish.slug, dish);
+            }
+        });
+
+        const categoriesByMenu: Map<MenuResultV3, CategoryResultV3[]> = new Map();
+        cafe.menus.forEach(menu => {
+            categoriesByMenu.set(menu, this.getMenuCategories(menu));
+        });
+
+        const dishesByCategory: Map<CategoryResultV3, DishResultV3[]> = new Map();
+        cafe.categories.forEach(category => {
+            dishesByCategory.set(category, this.getCategoryDishes(category));
+        });
+
+        this.indexed = true;
+
+        return this.indices = {
+            categoriesById,
+            dishesById,
+
+            categoriesByMenu,
+            dishesByCategory,
+        };
     }
 }
 
