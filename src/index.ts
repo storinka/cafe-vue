@@ -885,7 +885,7 @@ function words(text: string): string[] {
 function wordsIntersect(textA: string[], textB: string[]): boolean {
     for (const wordA of textA) {
         for (const wordB of textB) {
-            if (wordA.includes(wordB)) {
+            if (wordA.includes(wordB) || wordB.includes(wordA)) {
                 return true;
             }
         }
@@ -900,7 +900,7 @@ export function search(cafe: CafeResultV3, query: string): SearchResult {
     const queryWords = words(query);
 
     const categories = cafe.categories.filter((category) => {
-        const nameWords = words(category.name);
+        const nameWords = words(category.name.toLowerCase());
 
         return wordsIntersect(queryWords, nameWords);
     });
@@ -912,7 +912,7 @@ export function search(cafe: CafeResultV3, query: string): SearchResult {
 
         const dishesIds = dishes
             .filter((dish) => {
-                const nameWords = words(dish.name);
+                const nameWords = words(dish.name.toLowerCase());
 
                 return wordsIntersect(queryWords, nameWords);
             })
