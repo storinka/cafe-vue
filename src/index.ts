@@ -1,4 +1,4 @@
-import { App, reactive, watch } from "vue";
+import { App, reactive, ref, ToRef, watch } from "vue";
 import {
     AdvertisementResultV3,
     CafeResultV3,
@@ -9,9 +9,11 @@ import {
     DiscountResultV3,
     DishResultV3,
     DishVariantResultV3,
+    MadeOrderResultV2,
     MenuResultV3,
     OptionItemResultV3,
     OptionResultV3,
+    OrderResultV2,
     ReviewResultV3,
     SendReviewParams,
     SetResultV3,
@@ -38,6 +40,8 @@ export interface StorinkaOptions {
 
     keepCart?: boolean;
     keepLanguage?: boolean;
+    keepOrders?: boolean;
+    keepReviews?: boolean;
 
     loadSkinConfig?: boolean;
 
@@ -58,20 +62,20 @@ export class ApiError extends Error {
     }
 }
 
-type JSONValue = number | string | boolean | null | { [key: string]: JSONValue; };
+type JSONValue = number | string | boolean | null | { [key: string]: JSONValue; } | JSONValue[];
 
 export interface StorinkaStorage {
     setItem(key: string, value: any): void;
 
     removeItem(key: string): void;
 
-    getItem(key: string, defaultValue?: JSONValue): JSONValue;
+    getItem<T = JSONValue>(key: string, defaultValue?: T): T | null;
 }
 
 export class StorinkaLocalStorage implements StorinkaStorage {
     static KEY_PREFIX = "__strk_";
 
-    getItem(key: string, defaultValue?: JSONValue): JSONValue {
+    getItem<T = JSONValue>(key: string, defaultValue?: T): T | null {
         key = StorinkaLocalStorage.key(key);
 
         const item = localStorage.getItem(key);
@@ -86,10 +90,6 @@ export class StorinkaLocalStorage implements StorinkaStorage {
 
         if (item === "undefined") {
             return null;
-        }
-
-        if (!item.startsWith("\"") && !item.startsWith("{") && item.startsWith("[")) {
-            return item;
         }
 
         return JSON.parse(item);
@@ -139,6 +139,8 @@ export class Storinka {
     };
 
     cart: Cart;
+    orders: ToRef<OrderResultV2[]>;
+    reviews: ToRef<ReviewResultV3[]>;
 
     storage: StorinkaStorage;
 
@@ -168,6 +170,12 @@ export class Storinka {
         if (this.options.keepLanguage === undefined) {
             this.options.keepLanguage = true;
         }
+        if (this.options.keepOrders === undefined) {
+            this.options.keepOrders = true;
+        }
+        if (this.options.keepReviews === undefined) {
+            this.options.keepReviews = true;
+        }
         if (this.options.loadSkinConfig === undefined) {
             this.options.loadSkinConfig = true;
         }
@@ -185,12 +193,26 @@ export class Storinka {
         });
 
         this.cart = reactive(new Cart());
+        this.orders = ref<OrderResultV2[]>([]);
+        this.reviews = ref<ReviewResultV3[]>([]);
 
         this.storage = new StorinkaLocalStorage();
 
         if (this.options.keepCart) {
             watch(this.cart, cart => {
                 this.storage.setItem(this.storageKey("cart"), cart);
+            }, { deep: true });
+        }
+
+        if (this.options.keepOrders) {
+            watch(this.orders, orders => {
+                this.storage.setItem(this.storageKey("orders"), orders);
+            }, { deep: true });
+        }
+
+        if (this.options.keepReviews) {
+            watch(this.reviews, reviews => {
+                this.storage.setItem(this.storageKey("reviews"), reviews);
             }, { deep: true });
         }
 
@@ -251,6 +273,14 @@ export class Storinka {
 
                 if (this.options.keepCart) {
                     this.hydrateCart();
+                }
+
+                if (this.options.keepOrders) {
+                    this.hydrateOrders();
+                }
+
+                if (this.options.keepReviews) {
+                    this.hydrateReviews();
                 }
 
                 return cafe;
@@ -666,6 +696,10 @@ export class Storinka {
             contact: params.contact,
             message: params.message,
             stars: params.stars,
+        }).then((review: ReviewResultV3) => {
+            this.reviews.value = [review, ...this.reviews.value];
+
+            return review;
         });
     }
 
@@ -750,6 +784,29 @@ export class Storinka {
         });
     }
 
+    checkout(cleanItems: boolean = true): Promise<MadeOrderResultV2> {
+        return this.invoke("makeOrder", {
+            cafe_id: this.state.cafe?.id,
+            order: this.cart.buildOrder(),
+        }).then((madeOrder: MadeOrderResultV2) => {
+            if (cleanItems) {
+                this.cart.items = [];
+            }
+
+            this.orders.value = [madeOrder.order, ...this.orders.value];
+
+            return madeOrder;
+        });
+    }
+
+    getLocalOrders(): OrderResultV2[] {
+        return this.orders.value;
+    }
+
+    getLocalReviews(): ReviewResultV3[] {
+        return this.reviews.value;
+    }
+
     private hydrateCart(): void {
         const cartStateFromStorage = this.storage.getItem(this.storageKey("cart"));
         if (!cartStateFromStorage) {
@@ -762,6 +819,32 @@ export class Storinka {
             console.error(e);
 
             this.storage.removeItem(this.storageKey("cart"));
+        }
+    }
+
+    private hydrateOrders(): void {
+        const ordersFromStorage: OrderResultV2[] = this.storage.getItem(this.storageKey("orders")) ?? [];
+        if (!ordersFromStorage) {
+            return;
+        }
+
+        try {
+            this.orders.value = ordersFromStorage;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    private hydrateReviews(): void {
+        const reviewsFromStorage: ReviewResultV3[] = this.storage.getItem(this.storageKey("reviews")) ?? [];
+        if (!reviewsFromStorage) {
+            return;
+        }
+
+        try {
+            this.reviews.value = reviewsFromStorage;
+        } catch (e) {
+            console.error(e);
         }
     }
 

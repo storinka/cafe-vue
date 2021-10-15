@@ -223,6 +223,76 @@ export interface DeliveryZoneResultV2 {
     coordinates: number[][];
 }
 
+export interface MadeOrderResultV2 {
+    redirect?: null | RedirectResultV2;
+    order: OrderResultV2;
+}
+
+export interface RedirectResultV2 {
+    method: "get" | "post";
+    url: string;
+    params?: any;
+}
+
+export interface OrderResultV2 {
+    id: number;
+    hash_id: string;
+    cafe_id: number;
+    cafe_name: string;
+    created_at: number;
+    accepted_at?: null | number;
+    type: string;
+    payment_type: string;
+    customer: OrderCustomerResultV2;
+    message?: null | string;
+    status: string;
+    cancellation_reason?: null | string;
+    total: number;
+    delivery_price: number;
+    currency: string;
+    delivery_address?: null | DeliveryAddressResultV2;
+    delivery_estimated_time: number;
+    takeout_address?: null | TakeoutAddressResultV2;
+    expected_time?: null | number;
+    items: Array<OrderItemResultV2>;
+}
+
+export interface OrderCustomerResultV2 {
+    id: number;
+    name: string;
+    phone: string;
+}
+
+export interface DeliveryAddressResultV2 {
+    short: string;
+    details?: null | string;
+    lat?: null | number;
+    lng?: null | number;
+}
+
+export interface TakeoutAddressResultV2 {
+    id: number;
+    name: string;
+    lat?: null | number;
+    lng?: null | number;
+}
+
+export interface OrderItemResultV2 {
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+    total: number;
+    subitems: Array<OrderSubItemResultV2>;
+}
+
+export interface OrderSubItemResultV2 {
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+}
+
 export interface CartSubitem {
     option: OptionResultV3;
     optionItem: OptionItemResultV3;

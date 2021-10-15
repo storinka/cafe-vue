@@ -1,6 +1,6 @@
-# Storinka Vue plugin
+# Storinka Vue
 
-Vue plugin for Storinka skins.
+Vue 3 plugin for Storinka.
 
 ## Installation
 
@@ -83,6 +83,18 @@ Keep cart state in storage.
 - Type: `boolean | undefined`
 
 Keep language in storage.
+
+### `keepOrders`:
+
+- Type: `boolean | undefined`
+
+Keep orders in storage after checkout.
+
+### `keepReviews`:
+
+- Type: `boolean | undefined`
+
+Keep reviews in storage.
 
 ### `loadSkinConfig`:
 
@@ -211,6 +223,12 @@ makeCartItem(orderItem: OrderItemInputV3): CartItem;
 
 isDishInCart(dish: DishResultV3): boolean;
 
+checkDeliveryAddress(lat: number, lng: number): Promise<DeliveryZoneResultV2 | null>;
+
+checkout(cleanItems: boolean = true): Promise<MadeOrderResultV2>;
+
+getLocalOrders(): OrderResultV2[];
+
 
 getBrowserLanguage(): string;
 
@@ -227,7 +245,4 @@ getCategoryImageUrl(categoryOrId: CategoryResultV3 | number, size?: number): str
 getMenuImageUrl(menuOrId: MenuResultV3 | number, size?: number): string;
 
 getSizedImageUrl(url: string, size?: number): string;
-
-
-checkDeliveryAddress(lat: number, lng: number): Promise<DeliveryZoneResultV2 | null>;
 ```
