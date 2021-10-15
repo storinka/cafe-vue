@@ -860,3 +860,76 @@ declare module '@vue/runtime-core' {
         $storinka: Storinka;
     }
 }
+
+
+// search
+
+export interface SearchResultCategory {
+    id: number;
+    dishes: number[];
+}
+
+export interface SearchResult {
+    categoriesCount: number;
+    dishesCount: number;
+
+    categories: SearchResultCategory[];
+}
+
+function words(text: string): string[] {
+    return text
+        .split(" ")
+        .map((str) => str.trim());
+}
+
+function wordsIntersect(textA: string[], textB: string[]): boolean {
+    for (const wordA of textA) {
+        for (const wordB of textB) {
+            if (wordA.includes(wordB)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+export function search(cafe: CafeResultV3, query: string): SearchResult {
+    query = query.toLowerCase();
+
+    const queryWords = words(query);
+
+    const categories = cafe.categories.filter((category) => {
+        const nameWords = words(category.name);
+
+        return wordsIntersect(queryWords, nameWords);
+    });
+
+    const mappedCategories = categories.map((category) => {
+        const dishes: DishResultV3[] = category.dishes_ids
+            .map((dishId) => cafe.dishes.find((dish) => dish.id === dishId))
+            .filter((dish) => dish) as DishResultV3[];
+
+        const dishesIds = dishes
+            .filter((dish) => {
+                const nameWords = words(dish.name);
+
+                return wordsIntersect(queryWords, nameWords);
+            })
+            .map((dish) => dish.id);
+
+        return {
+            id: category.id,
+            dishes: dishesIds,
+        };
+    });
+
+    return {
+        categoriesCount: mappedCategories.length,
+        dishesCount: mappedCategories
+            .map((category) => category.dishes.length)
+            .reduce((a, b) => a + b, 0),
+
+        categories: mappedCategories,
+    };
+}
