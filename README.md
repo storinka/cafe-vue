@@ -210,8 +210,6 @@ getItemProperId(item: ItemWithSlugOrHashId): string;
 
 checkItemId(item: ItemWithSlugOrHashId, id: string | number): boolean;
 
-isCustomDomain(domain?: string): boolean;
-
 
 getCartTotal(): number;
 
@@ -232,7 +230,11 @@ getLocalOrders(): OrderResultV2[];
 
 getBrowserLanguage(): string;
 
+getSupportedLanguages(): Promise<SupportedLanguageV2[]>;
+
 getPriceAfterDiscount(price: number, discount: DiscountResultV3): number;
+
+isCustomDomain(domain?: string): boolean;
 
 
 sendReview(params: SendReviewParams): Promise<ReviewResultV3>;

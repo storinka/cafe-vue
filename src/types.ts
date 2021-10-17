@@ -234,6 +234,12 @@ export interface RedirectResultV2 {
     params?: any;
 }
 
+export interface SupportedLanguageV2 {
+    code: string;
+    name: string;
+    machine_translations: boolean;
+}
+
 export interface OrderResultV2 {
     id: number;
     hash_id: string;

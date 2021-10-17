@@ -17,6 +17,7 @@ import {
     ReviewResultV3,
     SendReviewParams,
     SetResultV3,
+    SupportedLanguageV2,
     TagResultV3
 } from "./types";
 import Cart, { OrderItemInputV3 } from "@storinka/cart";
@@ -805,6 +806,10 @@ export class Storinka {
 
     getLocalReviews(): ReviewResultV3[] {
         return this.reviews.value;
+    }
+
+    getSupportedLanguages(): Promise<SupportedLanguageV2[]> {
+        return this.invoke("getSupportedLanguages");
     }
 
     private hydrateCart(): void {
