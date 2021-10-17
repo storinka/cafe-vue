@@ -1031,6 +1031,3 @@ export function search(cafe: CafeResultV3, query: string): SearchResult {
         categories: mappedCategories,
     };
 }
-
-
-// analytics

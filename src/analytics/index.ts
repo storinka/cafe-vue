@@ -1,3 +1,5 @@
+import { CafeResultV3, CategoryResultV3, DishResultV3, MenuResultV3 } from "../types";
+
 function getRandomGUID() {
     const u = Date.now().toString(16) + Math.random().toString(16) + "0".repeat(16);
     return [u.substr(0, 8), u.substr(8, 4), "4000-8" + u.substr(13, 3), u.substr(16, 12)].join("-");
@@ -41,17 +43,16 @@ export function getStorinkaTID() {
     return tid;
 }
 
-export enum ItemType {
+export enum StorinkaAnalyticsItemType {
     OPEN_CAFE = 100,
-    OPEN_INFO = 102,
-
     OPEN_MENU = 200,
-
     OPEN_CATEGORY = 300,
-    OPEN_CATEGORY_SWIPE = 301,
-
     OPEN_DISH = 400,
-    OPEN_DISH_FROM_SEARCH = 401,
+}
+
+export enum GtagEventAction {
+    OPEN = "open",
+    SWITCH = "switch",
 }
 
 export interface StorinkaAnalyticsOptions {
@@ -91,7 +92,7 @@ export class StorinkaAnalytics {
         });
     }
 
-    push(type: ItemType, id: number): Promise<unknown> {
+    send(type: StorinkaAnalyticsItemType, id: number): Promise<unknown> {
         if (!this.options.enable) {
             return Promise.resolve();
         }
@@ -102,7 +103,7 @@ export class StorinkaAnalytics {
         });
     }
 
-    pushAlive(type: ItemType, id: number): Promise<unknown> {
+    sendAlive(type: StorinkaAnalyticsItemType, id: number): Promise<unknown> {
         if (!this.options.enable) {
             return Promise.resolve();
         }
@@ -112,4 +113,50 @@ export class StorinkaAnalytics {
             iid: id,
         });
     }
+
+    sendGtag(action: GtagEventAction, category: string, label: string) {
+        const gtag = (window as any).gtag;
+
+        if (gtag) {
+            gtag("event", action, {
+                event_category: category,
+                event_label: label
+            });
+        }
+    }
+
+    reportCafeWasOpen(cafe: CafeResultV3): Promise<unknown> {
+        return this.send(StorinkaAnalyticsItemType.OPEN_CAFE, cafe.id);
+    }
+
+    reportMenuWasOpen(menu: MenuResultV3): Promise<unknown> {
+        this.sendGtag(GtagEventAction.OPEN, "menu", menu.name);
+
+        return this.send(StorinkaAnalyticsItemType.OPEN_MENU, menu.id);
+    }
+
+    reportCategoryWasOpen(category: CategoryResultV3): Promise<unknown> {
+        this.sendGtag(GtagEventAction.OPEN, "menu", category.name);
+
+        return this.send(StorinkaAnalyticsItemType.OPEN_CATEGORY, category.id);
+    }
+
+    reportDishWasOpen(dish: DishResultV3): Promise<unknown> {
+        this.sendGtag(GtagEventAction.OPEN, "product", dish.name);
+
+        return this.send(StorinkaAnalyticsItemType.OPEN_DISH, dish.id);
+    }
+
+    reportAdvertisementWasOpen(advertisement: DishResultV3): Promise<unknown> {
+        this.sendGtag(GtagEventAction.OPEN, "advertisement", advertisement.name);
+
+        return Promise.resolve();
+    }
+
+    reportLanguageWasSwitched(code: string): Promise<unknown> {
+        this.sendGtag(GtagEventAction.SWITCH, "language", code);
+
+        return Promise.resolve();
+    }
 }
+

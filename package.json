@@ -1,7 +1,7 @@
 {
   "name": "@storinka/cafe-vue",
-  "version": "3.0.50",
-  "description": "Vue plugin for Storinka skins.",
+  "version": "3.0.51",
+  "description": "Vue 3 plugin for Storinka.",
   "main": "index.js",
   "repository": "https://github.com/storinka/cafe-vue",
   "author": "kohutd <davyd.kohut@gmail.com>",
