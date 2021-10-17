@@ -171,6 +171,7 @@ export interface CafeExtensionsResultV3 {
     orders?: null | OrdersCafeExtensionResultV3;
     cart?: null | CafeExtensionResultV3;
     feedback?: null | CafeExtensionResultV3;
+    machine_translations?: null | CafeExtensionResultV3;
 }
 
 export interface OrdersCafeExtensionResultV3 {
