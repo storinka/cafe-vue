@@ -592,7 +592,15 @@ export class Storinka {
     }
 
     getCartItems(): CartItem[] {
-        return this.cart.items.map(orderItem => this.makeCartItem(orderItem));
+        try {
+            return this.cart.items.map(orderItem => this.makeCartItem(orderItem));
+        } catch (e) {
+            console.error(e);
+
+            this.cart.items = [];
+
+            return [];
+        }
     }
 
     makeCartItem(orderItem: OrderItemInputV3): CartItem {
