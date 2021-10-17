@@ -2,6 +2,15 @@
 
 Vue 3 plugin for Storinka.
 
+## Content
+
+- [Installation](#Installation)
+- [Usage](#Usage)
+- [Options](#Options)
+- [Properties](#Properties)
+- [Functions](#Functions)
+- [Types](#Types)
+
 ## Installation
 
 ```shell
@@ -108,6 +117,12 @@ Load skin config after cafe was loaded.
 
 Provide image placeholders.
 
+### `analytics`:
+
+- Type: `StorinkaAnalyticsOptions | undefined`
+
+Analytics options.
+
 ## Properties
 
 ### `state`:
@@ -131,6 +146,10 @@ Check [https://github.com/storinka/cart](https://github.com/storinka/cart) for m
 ### `storage`:
 
 Storage instance. Type: `StorinkaStorage`.
+
+### `analytics`:
+
+Analytics instance. Type: `StorinkaAnalytics`.
 
 ## Functions
 
@@ -248,3 +267,7 @@ getMenuImageUrl(menuOrId: MenuResultV3 | number, size?: number): string;
 
 getSizedImageUrl(url: string, size?: number): string;
 ```
+
+## Types
+
+Types declarations are located here: [src/types.ts](src/types.ts)

@@ -21,6 +21,7 @@ import {
     TagResultV3
 } from "./types";
 import Cart, { OrderItemInputV3 } from "@storinka/cart";
+import { StorinkaAnalytics, StorinkaAnalyticsOptions } from "./analytics";
 
 export * from "./types";
 
@@ -47,6 +48,8 @@ export interface StorinkaOptions {
     loadSkinConfig?: boolean;
 
     imagePlaceholders?: StorinkaImagePlaceholdersOption;
+
+    analytics?: StorinkaAnalyticsOptions;
 }
 
 export class ApiError extends Error {
@@ -145,6 +148,8 @@ export class Storinka {
 
     storage: StorinkaStorage;
 
+    analytics: StorinkaAnalytics;
+
     constructor(options: StorinkaOptions) {
         this.options = options;
         if (!this.options.apiUrl) {
@@ -187,6 +192,9 @@ export class Storinka {
                 menu: "",
             } as StorinkaImagePlaceholdersOption;
         }
+        if (!this.options.analytics) {
+            this.options.analytics = {};
+        }
 
         this.state = reactive({
             isLoading: false,
@@ -198,6 +206,8 @@ export class Storinka {
         this.reviews = ref<ReviewResultV3[]>([]);
 
         this.storage = new StorinkaLocalStorage();
+
+        this.analytics = new StorinkaAnalytics(this.options.analytics);
 
         if (this.options.keepCart) {
             watch(this.cart, cart => {
@@ -1021,3 +1031,6 @@ export function search(cafe: CafeResultV3, query: string): SearchResult {
         categories: mappedCategories,
     };
 }
+
+
+// analytics
