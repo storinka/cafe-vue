@@ -1,6 +1,7 @@
 import { App, reactive, ref, ToRef, watch } from "vue";
 import {
     AdvertisementResultV3,
+    CafeAddressResultV3,
     CafeResultV3,
     CartItem,
     CartSubitem,
@@ -830,6 +831,11 @@ export class Storinka {
         return this.invoke("getSupportedLanguages");
     }
 
+    getCurrentAddress(): CafeAddressResultV3 | undefined {
+        return (this.state.cafe?.addresses ?? [])
+            .find((address: CafeAddressResultV3) => this.checkItemId(address, this.state.id || 0));
+    }
+
     private hydrateCart(): void {
         const cartStateFromStorage = this.storage.getItem(this.storageKey("cart"));
         if (!cartStateFromStorage) {
@@ -955,7 +961,13 @@ export class Storinka {
     }
 }
 
-type ItemWithSlugOrHashId = MenuResultV3 | CategoryResultV3 | DishResultV3 | TagResultV3 | AdvertisementResultV3;
+type ItemWithSlugOrHashId =
+    MenuResultV3
+    | CategoryResultV3
+    | DishResultV3
+    | TagResultV3
+    | AdvertisementResultV3
+    | CafeAddressResultV3;
 
 export function createStorinka(options: StorinkaOptions = {}): Storinka {
     return new Storinka(options);
@@ -1005,30 +1017,39 @@ export function search(cafe: CafeResultV3, query: string): SearchResult {
 
     const queryWords = words(query);
 
-    const categories = cafe.categories.filter((category) => {
-        const nameWords = words(category.name.toLowerCase());
+    const categories = cafe.categories
+        .filter((category) => {
+            const nameWords = words(category.name.toLowerCase());
 
-        return wordsIntersect(queryWords, nameWords);
-    });
+            return wordsIntersect(queryWords, nameWords);
+        }).map((category) => {
+            return {
+                id: category.id,
+                dishes: [],
+            };
+        });
 
-    const mappedCategories = categories.map((category) => {
-        const dishes: DishResultV3[] = category.dishes_ids
-            .map((dishId) => cafe.dishes.find((dish) => dish.id === dishId))
-            .filter((dish) => dish) as DishResultV3[];
+    const mappedCategories = cafe.categories
+        .filter((category) => !categories.find((c) => c.id === category.id))
+        .map((category) => {
+            const dishes: DishResultV3[] = category.dishes_ids
+                .map((dishId) => cafe.dishes.find((dish) => dish.id === dishId))
+                .filter((dish) => dish) as DishResultV3[];
 
-        const dishesIds = dishes
-            .filter((dish) => {
-                const nameWords = words(dish.name.toLowerCase());
+            const dishesIds = dishes
+                .filter((dish) => {
+                    const nameWords = words(dish.name.toLowerCase());
 
-                return wordsIntersect(queryWords, nameWords);
-            })
-            .map((dish) => dish.id);
+                    return wordsIntersect(queryWords, nameWords);
+                })
+                .map((dish) => dish.id);
 
-        return {
-            id: category.id,
-            dishes: dishesIds,
-        };
-    });
+            return {
+                id: category.id,
+                dishes: dishesIds,
+            };
+        })
+        .filter((category) => category.dishes.length);
 
     return {
         categoriesCount: mappedCategories.length,
@@ -1036,6 +1057,6 @@ export function search(cafe: CafeResultV3, query: string): SearchResult {
             .map((category) => category.dishes.length)
             .reduce((a, b) => a + b, 0),
 
-        categories: mappedCategories,
+        categories: [...categories, ...mappedCategories],
     };
 }

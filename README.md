@@ -266,6 +266,9 @@ getCategoryImageUrl(categoryOrId: CategoryResultV3 | number, size?: number): str
 getMenuImageUrl(menuOrId: MenuResultV3 | number, size?: number): string;
 
 getSizedImageUrl(url: string, size?: number): string;
+
+
+getCurrentAddress(): CafeAddressResultV3 | undefined;
 ```
 
 ## Types
