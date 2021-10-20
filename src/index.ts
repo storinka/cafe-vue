@@ -22,7 +22,7 @@ import {
     TagResultV3
 } from "./types";
 import Cart, { OrderItemInputV3 } from "@storinka/cart";
-import { StorinkaAnalytics, StorinkaAnalyticsOptions } from "./analytics";
+import { StorinkaAnalytics, StorinkaAnalyticsItemType, StorinkaAnalyticsOptions } from "./analytics";
 
 export * from "./types";
 
@@ -45,6 +45,8 @@ export interface StorinkaOptions {
     keepLanguage?: boolean;
     keepOrders?: boolean;
     keepReviews?: boolean;
+
+    trackOnline?: boolean;
 
     loadSkinConfig?: boolean;
 
@@ -196,6 +198,9 @@ export class Storinka {
         if (!this.options.analytics) {
             this.options.analytics = {};
         }
+        if (!this.options.trackOnline) {
+            this.options.trackOnline = false;
+        }
 
         this.state = reactive({
             isLoading: false,
@@ -236,6 +241,17 @@ export class Storinka {
             } else {
                 this.storage.removeItem("language");
             }
+        }
+
+        if (this.options.trackOnline && this.options.analytics?.enable) {
+            const isVisible = () => document.visibilityState === "hidden";
+
+            // every 30 it sends a ping to analytics server which says that user is still on the page
+            setInterval(async () => {
+                if (this.state.cafe && isVisible()) {
+                    await this.analytics.sendAlive(StorinkaAnalyticsItemType.OPEN_CAFE, this.state.cafe.id);
+                }
+            }, 1000 * 30);
         }
 
         this.indexed = false;
