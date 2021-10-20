@@ -808,6 +808,7 @@ export class Storinka {
         return this.invoke("makeOrder", {
             cafe_id: this.state.cafe?.id,
             order: this.cart.buildOrder(),
+            locale: this.state.language,
         }).then((madeOrder: MadeOrderResultV2) => {
             if (cleanItems) {
                 this.cart.items = [];
