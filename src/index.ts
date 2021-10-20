@@ -655,14 +655,17 @@ export class Storinka {
         const subitemsTotal: number = subitems.map(subitem => subitem.total)
             .reduce((p, c) => p + c, 0);
 
-        const quantity = orderItem.quantity;
-        const total = (subitemsTotal + variant.price) * quantity;
-        let totalAfterDiscounts = total;
+        const price = variant.price;
+        let priceAfterDiscounts = variant.price;
 
         const discount = this.getDishDiscount(dish);
         if (discount) {
-            totalAfterDiscounts = this.getPriceAfterDiscount(total, discount);
+            priceAfterDiscounts = this.getPriceAfterDiscount(priceAfterDiscounts, discount);
         }
+
+        const quantity = orderItem.quantity;
+        const total = (price + subitemsTotal) * quantity;
+        const totalAfterDiscounts = (priceAfterDiscounts + subitemsTotal) * quantity;
 
         return {
             dish,
