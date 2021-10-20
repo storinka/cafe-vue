@@ -216,17 +216,9 @@ export interface OrdersCafeExtensionTakeoutAddressResultV3 {
     lng: number;
 }
 
-export interface DeliveryZoneResultV2 {
-    id: number;
-    name: string;
-    price?: null | number;
-    approximate_time: number;
-    coordinates: number[][];
-}
-
-export interface MadeOrderResultV2 {
+export interface MadeOrderResultV3 {
     redirect?: null | RedirectResultV2;
-    order: OrderResultV2;
+    order: OrderResultV3;
 }
 
 export interface RedirectResultV2 {
@@ -241,63 +233,72 @@ export interface SupportedLanguageV2 {
     machine_translations: boolean;
 }
 
-export interface OrderResultV2 {
+export interface OrderResultV3 {
     id: number;
     hash_id: string;
-    cafe_id: number;
-    cafe_name: string;
     created_at: number;
     accepted_at?: null | number;
+    cafe_id: number;
+    cafe_name: string;
     type: string;
     payment_type: string;
-    customer: OrderCustomerResultV2;
-    message?: null | string;
+    customer: OrderCustomerResultV3;
+    customer_note?: null | string;
     status: string;
     cancellation_reason?: null | string;
-    total: number;
     delivery_price: number;
-    currency: string;
-    delivery_address?: null | DeliveryAddressResultV2;
-    delivery_estimated_time: number;
-    takeout_address?: null | TakeoutAddressResultV2;
+    delivery_zone?: null | DeliveryZoneResultV3;
+    delivery_address?: null | DeliveryAddressResultV3;
+    takeout_address?: null | TakeoutAddressResultV3;
     expected_time?: null | number;
-    items: Array<OrderItemResultV2>;
+    currency: string;
+    total: number;
+    items: Array<OrderItemResultV3>;
 }
 
-export interface OrderCustomerResultV2 {
+export interface OrderCustomerResultV3 {
     id: number;
     name: string;
     phone: string;
 }
 
-export interface DeliveryAddressResultV2 {
+export interface DeliveryZoneResultV3 {
+    id: number;
+    name: string;
+    price?: null | number;
+    approximate_time: number;
+    coordinates: number[][];
+}
+
+export interface DeliveryAddressResultV3 {
     short: string;
     details?: null | string;
     lat?: null | number;
     lng?: null | number;
 }
 
-export interface TakeoutAddressResultV2 {
+export interface TakeoutAddressResultV3 {
     id: number;
     name: string;
     lat?: null | number;
     lng?: null | number;
 }
 
-export interface OrderItemResultV2 {
+export interface OrderItemResultV3 {
     id: number;
     name: string;
     price: number;
     quantity: number;
     total: number;
-    subitems: Array<OrderSubItemResultV2>;
+    subitems: Array<OrderSubItemResultV3>;
 }
 
-export interface OrderSubItemResultV2 {
+export interface OrderSubItemResultV3 {
     id: number;
     name: string;
     price: number;
     quantity: number;
+    total: number;
 }
 
 export interface CartSubitem {

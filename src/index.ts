@@ -6,15 +6,15 @@ import {
     CartItem,
     CartSubitem,
     CategoryResultV3,
-    DeliveryZoneResultV2,
+    DeliveryZoneResultV3,
     DiscountResultV3,
     DishResultV3,
     DishVariantResultV3,
-    MadeOrderResultV2,
+    MadeOrderResultV3,
     MenuResultV3,
     OptionItemResultV3,
     OptionResultV3,
-    OrderResultV2,
+    OrderResultV3,
     ReviewResultV3,
     SendReviewParams,
     SetResultV3,
@@ -146,7 +146,7 @@ export class Storinka {
     };
 
     cart: Cart;
-    orders: ToRef<OrderResultV2[]>;
+    orders: ToRef<OrderResultV3[]>;
     reviews: ToRef<ReviewResultV3[]>;
 
     storage: StorinkaStorage;
@@ -208,7 +208,7 @@ export class Storinka {
         });
 
         this.cart = reactive(new Cart());
-        this.orders = ref<OrderResultV2[]>([]);
+        this.orders = ref<OrderResultV3[]>([]);
         this.reviews = ref<ReviewResultV3[]>([]);
 
         this.storage = new StorinkaLocalStorage();
@@ -802,13 +802,13 @@ export class Storinka {
         return url;
     }
 
-    checkDeliveryAddress(lat: number, lng: number): Promise<DeliveryZoneResultV2 | null> {
+    checkDeliveryAddress(lat: number, lng: number): Promise<DeliveryZoneResultV3 | null> {
         return this.invoke("getDeliveryZoneByCoordinates", {
             cafe_id: this.state.cafe?.id,
             lat,
             lng
         }).then(deliveryZone => {
-            return deliveryZone as DeliveryZoneResultV2;
+            return deliveryZone as DeliveryZoneResultV3;
         }).catch(error => {
             if (error instanceof ApiError) {
                 if (error.name === "DELIVERY_ZONE_NOT_FOUND") {
@@ -820,12 +820,12 @@ export class Storinka {
         });
     }
 
-    checkout(cleanItems: boolean = true): Promise<MadeOrderResultV2> {
+    checkout(cleanItems: boolean = true): Promise<MadeOrderResultV3> {
         return this.invoke("makeOrder", {
             cafe_id: this.state.cafe?.id,
             order: this.cart.buildOrder(),
             locale: this.state.language,
-        }).then((madeOrder: MadeOrderResultV2) => {
+        }).then((madeOrder: MadeOrderResultV3) => {
             if (cleanItems) {
                 this.cart.items = [];
             }
@@ -836,7 +836,7 @@ export class Storinka {
         });
     }
 
-    getLocalOrders(): OrderResultV2[] {
+    getLocalOrders(): OrderResultV3[] {
         return this.orders.value;
     }
 
@@ -869,7 +869,7 @@ export class Storinka {
     }
 
     private hydrateOrders(): void {
-        const ordersFromStorage: OrderResultV2[] = this.storage.getItem(this.storageKey("orders")) ?? [];
+        const ordersFromStorage: OrderResultV3[] = this.storage.getItem(this.storageKey("orders")) ?? [];
         if (!ordersFromStorage) {
             return;
         }
