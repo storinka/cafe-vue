@@ -99,7 +99,7 @@ export class StorinkaAnalytics {
 
         return this.invoke("push", {
             ity: type,
-            iid: id,
+            iid2: id,
         });
     }
 
@@ -110,7 +110,7 @@ export class StorinkaAnalytics {
 
         return this.invoke("pushAlive", {
             ity: type,
-            iid: id,
+            iid2: id,
         });
     }
 
