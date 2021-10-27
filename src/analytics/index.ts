@@ -48,6 +48,9 @@ export enum StorinkaAnalyticsItemType {
     OPEN_MENU = 200,
     OPEN_CATEGORY = 300,
     OPEN_DISH = 400,
+    OPEN_ADVERTISEMENT = 500,
+    SHOW_POPUP = 600,
+    CLICK_POPUP_BUTTON = 601,
 }
 
 export enum GtagEventAction {
@@ -120,7 +123,7 @@ export class StorinkaAnalytics {
             return Promise.resolve();
         }
 
-        if (!this.isReported(type, id)) {
+        if (this.isReported(type, id)) {
             return Promise.resolve();
         }
 

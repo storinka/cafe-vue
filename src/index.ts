@@ -244,7 +244,8 @@ export class Storinka {
         }
 
         if (this.options.trackOnline && this.options.analytics?.enable) {
-            const isVisible = () => document.visibilityState === "hidden";
+            const isVisible = () => document.visibilityState !== "hidden";
+
             const report = async () => {
                 if (this.state.cafe && isVisible()) {
                     await this.analytics.sendAlive(StorinkaAnalyticsItemType.OPEN_CAFE, this.state.cafe.id);
