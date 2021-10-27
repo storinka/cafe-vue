@@ -245,12 +245,17 @@ export class Storinka {
 
         if (this.options.trackOnline && this.options.analytics?.enable) {
             const isVisible = () => document.visibilityState === "hidden";
-
-            // every 30 it sends a ping to analytics server which says that user is still on the page
-            setInterval(async () => {
+            const report = async () => {
                 if (this.state.cafe && isVisible()) {
                     await this.analytics.sendAlive(StorinkaAnalyticsItemType.OPEN_CAFE, this.state.cafe.id);
                 }
+            }
+
+            report();
+
+            // every 30 it sends a ping to analytics server which says that user is still on the page
+            setInterval(async () => {
+                await report();
             }, 1000 * 30);
         }
 
@@ -319,6 +324,10 @@ export class Storinka {
     }
 
     setLanguage(language: string): Promise<CafeResultV3> {
+        if (this.state.language === language) {
+            return Promise.resolve(this.state.cafe as CafeResultV3);
+        }
+
         this.state.isLoading = true;
 
         this.state.language = language;

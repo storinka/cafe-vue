@@ -64,6 +64,7 @@ export interface StorinkaAnalyticsOptions {
 
 export class StorinkaAnalytics {
     options: StorinkaAnalyticsOptions;
+    reported: { [key: number]: number[] };
 
     constructor(options: StorinkaAnalyticsOptions = {}) {
         this.options = options;
@@ -76,6 +77,28 @@ export class StorinkaAnalytics {
         }
         if (!this.options.apiVersion) {
             this.options.apiVersion = "1";
+        }
+
+        this.reported = {};
+    }
+
+    isReported(type: StorinkaAnalyticsItemType, id: number) {
+        const reported: number[] | undefined = this.reported[type];
+
+        if (!reported) {
+            return false;
+        }
+
+        return reported.includes(id);
+    }
+
+    pushReported(type: StorinkaAnalyticsItemType, id: number): void {
+        const reported: number[] | undefined = this.reported[type];
+
+        if (reported) {
+            reported.push(id);
+        } else {
+            this.reported[type] = [id];
         }
     }
 
@@ -96,6 +119,12 @@ export class StorinkaAnalytics {
         if (!this.options.enable) {
             return Promise.resolve();
         }
+
+        if (!this.isReported(type, id)) {
+            return Promise.resolve();
+        }
+
+        this.pushReported(type, id);
 
         return this.invoke("push", {
             ity: type,
