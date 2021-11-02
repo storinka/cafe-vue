@@ -24,6 +24,28 @@ export interface CafeResultV3 {
     addresses: Array<CafeAddressResultV3>;
     workdays: Array<CafeWorkdayResultV3>;
     contacts: Array<CafeContactResultV3>;
+    popups: Array<PopupResultV3>;
+}
+
+export interface PopupResultV3 {
+    buttons: Array<PopupButtonResultV3>;
+    id: number;
+    position: number;
+    closable: boolean;
+    new_visitors_only: boolean;
+    once_per_user: boolean;
+    image?: null | string;
+    title: string;
+    text: string;
+}
+
+export interface PopupButtonResultV3 {
+    id: number;
+    position: number;
+    action?: null | string;
+    action_data?: null | any;
+    text: string;
+    color: string;
 }
 
 export interface CafeSettingsResultV3 {

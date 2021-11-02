@@ -1,4 +1,19 @@
-import { CafeResultV3, CategoryResultV3, DishResultV3, MenuResultV3 } from "../types";
+import {
+    AdvertisementResultV3,
+    CafeResultV3,
+    CategoryResultV3,
+    DishResultV3,
+    MenuResultV3,
+    PopupButtonResultV3,
+    PopupResultV3
+} from "../types";
+import { Storinka } from "../index";
+
+// @ts-ignore
+const noAnal = /[?&]no_anal/.test(window.location.search) || process?.env?.DISABLE_ANAL || localStorage.getItem("__no_anal") === "on";
+if (noAnal) {
+    localStorage.setItem("__no_anal", "on");
+}
 
 function getRandomGUID() {
     const u = Date.now().toString(16) + Math.random().toString(16) + "0".repeat(16);
@@ -49,12 +64,13 @@ export enum StorinkaAnalyticsItemType {
     OPEN_CATEGORY = 300,
     OPEN_DISH = 400,
     OPEN_ADVERTISEMENT = 500,
-    SHOW_POPUP = 600,
+    OPEN_POPUP = 600,
     CLICK_POPUP_BUTTON = 601,
 }
 
 export enum GtagEventAction {
     OPEN = "open",
+    CLICK = "click",
     SWITCH = "switch",
 }
 
@@ -65,12 +81,31 @@ export interface StorinkaAnalyticsOptions {
     apiVersion?: string;
 }
 
+function seePopup(popup: PopupResultV3, storinka: Storinka) {
+    let seenPopups = storinka.storage.getItem("seen_popups");
+
+    if (!Array.isArray(seenPopups)) {
+        seenPopups = [];
+    }
+
+    if (seenPopups.includes(popup.id)) {
+        return;
+    }
+
+    seenPopups = [...seenPopups, popup.id];
+
+    storinka.storage.setItem("seen_popups", seenPopups);
+}
+
+
 export class StorinkaAnalytics {
     options: StorinkaAnalyticsOptions;
     reported: { [key: number]: number[] };
+    storinka: Storinka;
 
-    constructor(options: StorinkaAnalyticsOptions = {}) {
+    constructor(options: StorinkaAnalyticsOptions = {}, storinka: Storinka) {
         this.options = options;
+        this.storinka = storinka;
 
         if (this.options.enable === undefined) {
             this.options.enable = false;
@@ -123,6 +158,10 @@ export class StorinkaAnalytics {
             return Promise.resolve();
         }
 
+        if (noAnal) {
+            return Promise.resolve();
+        }
+
         if (this.isReported(type, id)) {
             return Promise.resolve();
         }
@@ -140,13 +179,21 @@ export class StorinkaAnalytics {
             return Promise.resolve();
         }
 
+        if (noAnal) {
+            return Promise.resolve();
+        }
+
         return this.invoke("pushAlive", {
             ity: type,
             iid2: id,
         });
     }
 
-    sendGtag(action: GtagEventAction, category: string, label: string) {
+    sendGtag(action: GtagEventAction, category: string, label: string): void {
+        if (noAnal) {
+            return;
+        }
+
         const gtag = (window as any).gtag;
 
         if (gtag) {
@@ -179,10 +226,38 @@ export class StorinkaAnalytics {
         return this.send(StorinkaAnalyticsItemType.OPEN_DISH, dish.id);
     }
 
-    reportAdvertisementWasOpen(advertisement: DishResultV3): Promise<unknown> {
-        this.sendGtag(GtagEventAction.OPEN, "advertisement", advertisement.name);
+    reportAdvertisementWasOpen(advertisement: AdvertisementResultV3): Promise<unknown> {
+        this.sendGtag(GtagEventAction.OPEN, "advertisement", advertisement.title);
 
         return Promise.resolve();
+    }
+
+    reportPopupWasOpen(popup: PopupResultV3): Promise<unknown> {
+        this.sendGtag(GtagEventAction.OPEN, "popup", popup.title || String(popup.id));
+
+        seePopup(popup, this.storinka);
+
+        if (!noAnal) {
+            this.storinka.invoke("reportPopupWasOpen", {
+                popup_id: popup.id,
+                tid: getStorinkaTID(),
+            });
+        }
+
+        return this.send(StorinkaAnalyticsItemType.OPEN_POPUP, popup.id);
+    }
+
+    reportPopupButtonWasClicked(button: PopupButtonResultV3): Promise<unknown> {
+        this.sendGtag(GtagEventAction.CLICK, "popup-button", button.text || String(button.id));
+
+        if (!noAnal) {
+            this.storinka.invoke("reportPopupButtonWasClicked", {
+                popup_button_id: button.id,
+                tid: getStorinkaTID(),
+            });
+        }
+
+        return this.send(StorinkaAnalyticsItemType.CLICK_POPUP_BUTTON, button.id);
     }
 
     reportLanguageWasSwitched(code: string): Promise<unknown> {

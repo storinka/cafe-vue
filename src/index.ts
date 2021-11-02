@@ -213,7 +213,7 @@ export class Storinka {
 
         this.storage = new StorinkaLocalStorage();
 
-        this.analytics = new StorinkaAnalytics(this.options.analytics);
+        this.analytics = new StorinkaAnalytics(this.options.analytics, this);
 
         if (this.options.keepCart) {
             watch(this.cart, cart => {
@@ -244,24 +244,22 @@ export class Storinka {
         }
 
         if (this.options.trackOnline && this.options.analytics?.enable) {
-            const isVisible = () => document.visibilityState !== "hidden";
-
-            const report = async () => {
-                if (this.state.cafe && isVisible()) {
-                    await this.analytics.sendAlive(StorinkaAnalyticsItemType.OPEN_CAFE, this.state.cafe.id);
-                }
-            }
-
-            report();
-
             // every 30 it sends a ping to analytics server which says that user is still on the page
             setInterval(async () => {
-                await report();
+                await this.reportUserIsStillOnPage();
             }, 1000 * 30);
         }
 
         this.indexed = false;
         this.indices = this.reindex();
+    }
+
+    async reportUserIsStillOnPage() {
+        const isVisible = () => document.visibilityState !== "hidden";
+
+        if (this.state.cafe && isVisible()) {
+            await this.analytics.sendAlive(StorinkaAnalyticsItemType.OPEN_CAFE, this.state.cafe.id);
+        }
     }
 
     install(app: App): void {
@@ -315,6 +313,10 @@ export class Storinka {
 
                 if (this.options.keepReviews) {
                     this.hydrateReviews();
+                }
+
+                if (this.options.trackOnline && this.options.analytics?.enable) {
+                    this.reportUserIsStillOnPage();
                 }
 
                 return cafe;
@@ -836,7 +838,10 @@ export class Storinka {
     checkout(cleanItems: boolean = true): Promise<MadeOrderResultV3> {
         return this.invoke("makeOrder", {
             cafe_id: this.state.cafe?.id,
-            order: this.cart.buildOrder(),
+            order: {
+                ...this.cart.buildOrder(),
+                domain: this.options.domain,
+            },
             locale: this.state.language,
         }).then((madeOrder: MadeOrderResultV3) => {
             if (cleanItems) {
