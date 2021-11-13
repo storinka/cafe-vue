@@ -9,10 +9,15 @@ import {
 } from "../types";
 import { Storinka } from "../index";
 
-// @ts-ignore
-const noAnal = /[?&]no_anal/.test(window.location.search) || process?.env?.DISABLE_ANAL || localStorage.getItem("__no_anal") === "on";
-if (noAnal) {
-    localStorage.setItem("__no_anal", "on");
+function isNoAnal() {
+    // @ts-ignore
+    const noAnal = /[?&]no_anal/.test(window.location.search) || process?.env?.DISABLE_ANAL || localStorage.getItem("__no_anal") === "on";
+
+    if (noAnal) {
+        localStorage.setItem("__no_anal", "on");
+    }
+
+    return noAnal;
 }
 
 function getRandomGUID() {
@@ -158,7 +163,7 @@ export class StorinkaAnalytics {
             return Promise.resolve();
         }
 
-        if (noAnal) {
+        if (isNoAnal()) {
             return Promise.resolve();
         }
 
@@ -179,7 +184,7 @@ export class StorinkaAnalytics {
             return Promise.resolve();
         }
 
-        if (noAnal) {
+        if (isNoAnal()) {
             return Promise.resolve();
         }
 
@@ -190,7 +195,7 @@ export class StorinkaAnalytics {
     }
 
     sendGtag(action: GtagEventAction, category: string, label: string): void {
-        if (noAnal) {
+        if (isNoAnal()) {
             return;
         }
 
@@ -237,7 +242,7 @@ export class StorinkaAnalytics {
 
         seePopup(popup, this.storinka);
 
-        if (!noAnal) {
+        if (!isNoAnal()) {
             this.storinka.invoke("reportPopupWasOpen", {
                 popup_id: popup.id,
                 tid: getStorinkaTID(),
@@ -250,7 +255,7 @@ export class StorinkaAnalytics {
     reportPopupButtonWasClicked(button: PopupButtonResultV3): Promise<unknown> {
         this.sendGtag(GtagEventAction.CLICK, "popup-button", button.text || String(button.id));
 
-        if (!noAnal) {
+        if (!isNoAnal()) {
             this.storinka.invoke("reportPopupButtonWasClicked", {
                 popup_button_id: button.id,
                 tid: getStorinkaTID(),
