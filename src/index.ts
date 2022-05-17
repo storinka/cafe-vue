@@ -159,7 +159,7 @@ export class Storinka {
             this.options.apiUrl = "https://api.storinka.menu"
         }
         if (!this.options.apiVersion) {
-            this.options.apiVersion = "3";
+            this.options.apiVersion = "4";
         }
         if (!this.options.skinsApiUrl) {
             this.options.skinsApiUrl = "https://skins.storinka.menu"
