@@ -837,7 +837,7 @@ export class Storinka {
 
     checkout(cleanItems: boolean = true): Promise<MadeOrderResultV3> {
         return this.invoke("makeOrder", {
-            cafe_id: this.state.cafe?.id,
+            id: this.state.id,
             order: {
                 ...this.cart.buildOrder(),
                 domain: this.options.domain,
