@@ -1,6 +1,6 @@
 {
   "name": "@storinka/cafe-vue",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Vue 3 plugin for Storinka.",
   "main": "index.js",
   "repository": "https://github.com/storinka/cafe-vue",
@@ -20,7 +20,7 @@
     "typescript": "^4.2.4"
   },
   "dependencies": {
-    "@storinka/cart": "^4.0.0",
+    "@storinka/cart": "^4.0.1",
     "vue": "^3.2.19",
     "vuex": "^4.0.2"
   }
