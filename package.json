@@ -1,6 +1,6 @@
 {
   "name": "@storinka/cafe-vue",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "Vue 3 plugin for Storinka.",
   "main": "index.js",
   "repository": "https://github.com/storinka/cafe-vue",
