@@ -288,6 +288,7 @@ export interface DeliveryZoneResultV3 {
     id: number;
     name: string;
     price?: null | number;
+    free_delivery_after?: null | number;
     approximate_time: number;
     coordinates: number[][];
 }
