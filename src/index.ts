@@ -633,64 +633,86 @@ export class Storinka {
     }
 
     makeCartItem(orderItem: OrderItemInputV3): CartItem {
-        const dish = orderItem.item_type === "dish" ? this.getDish(orderItem.item_id) : this.getDishByVariant(orderItem.item_id);
-        if (!dish) {
-            throw new Error(`Dish ${orderItem.item_id} not found!`);
-        }
-
-        const variant = orderItem.item_type === "dish" ? this.getDishDefaultVariant(orderItem.item_id) : this.getVariant(orderItem.item_id);
-        if (!variant) {
-            throw new Error(`Variant ${orderItem.item_id} not found!`);
-        }
-
-        const subitems = orderItem.subitems.map(orderSubitem => {
-            const option = this.getOptionByItem(orderSubitem.item_id);
-            if (!option) {
-                throw new Error(`Option for item ${orderSubitem.item_id} not found!`);
+        // @ts-ignore
+        if (orderItem.item_type === "set") {
+            const set = this.getSet(orderItem.item_id);
+            if (!set) {
+                throw new Error(`Set ${orderItem.item_id} not found!`);
             }
 
-            const optionItem = this.getOptionItem(orderSubitem.item_id);
-            if (!optionItem) {
-                throw new Error(`Option item ${orderSubitem.item_id} not found!`);
-            }
+            const price = set.price;
+            const quantity = orderItem.quantity;
+            const total = (price || 0) * quantity;
 
             return {
-                option,
-                optionItem,
+                quantity,
+                total,
+                totalAfterDiscounts: total,
 
-                total: optionItem.price,
+                subitems: [],
 
-                orderSubitem,
-            } as CartSubitem;
-        });
+                orderItem,
+            } as CartItem;
+        } else {
+            const dish = orderItem.item_type === "dish" ? this.getDish(orderItem.item_id) : this.getDishByVariant(orderItem.item_id);
+            if (!dish) {
+                throw new Error(`Dish ${orderItem.item_id} not found!`);
+            }
 
-        const subitemsTotal: number = subitems.map(subitem => subitem.total)
-            .reduce((p, c) => p + c, 0);
+            const variant = orderItem.item_type === "dish" ? this.getDishDefaultVariant(orderItem.item_id) : this.getVariant(orderItem.item_id);
+            if (!variant) {
+                throw new Error(`Variant ${orderItem.item_id} not found!`);
+            }
 
-        const price = variant.price;
-        let priceAfterDiscounts = variant.price;
+            const subitems = orderItem.subitems.map(orderSubitem => {
+                const option = this.getOptionByItem(orderSubitem.item_id);
+                if (!option) {
+                    throw new Error(`Option for item ${orderSubitem.item_id} not found!`);
+                }
 
-        const discount = this.getDishDiscount(dish);
-        if (discount) {
-            priceAfterDiscounts = this.getPriceAfterDiscount(priceAfterDiscounts, discount);
+                const optionItem = this.getOptionItem(orderSubitem.item_id);
+                if (!optionItem) {
+                    throw new Error(`Option item ${orderSubitem.item_id} not found!`);
+                }
+
+                return {
+                    option,
+                    optionItem,
+
+                    total: optionItem.price,
+
+                    orderSubitem,
+                } as CartSubitem;
+            });
+
+            const subitemsTotal: number = subitems.map(subitem => subitem.total)
+                .reduce((p, c) => p + c, 0);
+
+            const price = variant.price;
+            let priceAfterDiscounts = variant.price;
+
+            const discount = this.getDishDiscount(dish);
+            if (discount) {
+                priceAfterDiscounts = this.getPriceAfterDiscount(priceAfterDiscounts, discount);
+            }
+
+            const quantity = orderItem.quantity;
+            const total = (price + subitemsTotal) * quantity;
+            const totalAfterDiscounts = (priceAfterDiscounts + subitemsTotal) * quantity;
+
+            return {
+                dish,
+                variant,
+
+                quantity,
+                total,
+                totalAfterDiscounts,
+
+                subitems,
+
+                orderItem,
+            } as CartItem;
         }
-
-        const quantity = orderItem.quantity;
-        const total = (price + subitemsTotal) * quantity;
-        const totalAfterDiscounts = (priceAfterDiscounts + subitemsTotal) * quantity;
-
-        return {
-            dish,
-            variant,
-
-            quantity,
-            total,
-            totalAfterDiscounts,
-
-            subitems,
-
-            orderItem,
-        } as CartItem;
     }
 
     isDishInCart(dish: DishResultV3): boolean {

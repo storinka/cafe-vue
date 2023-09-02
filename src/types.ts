@@ -333,8 +333,9 @@ export interface CartSubitem {
 }
 
 export interface CartItem {
-    dish: DishResultV3;
-    variant: DishVariantResultV3;
+    dish?: DishResultV3;
+    variant?: DishVariantResultV3;
+    set?: SetResultV3;
     quantity: number;
     total: number;
     totalAfterDiscounts: number;
